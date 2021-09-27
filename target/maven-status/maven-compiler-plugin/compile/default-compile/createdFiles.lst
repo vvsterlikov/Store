@@ -1,0 +1,3 @@
+org\store\domain\ProductCategory.class
+org\store\repository\ProductCategoryRepository.class
+org\store\Store.class
