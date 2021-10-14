@@ -74,6 +74,16 @@
                         <phase>generate-resources</phase>
                     </execution>
                     <execution>
+                        <id>npm install webpack</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --save-dev webpack</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>npm install</id>
                         <goals>
                             <goal>npm</goal>
@@ -81,6 +91,46 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <arguments>install --save-dev webpack-cli</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>babel install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --save-dev babel-loader</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>babel core install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --save-dev @babel/core @babel/preset-env @babel/preset-react</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>react install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --save-dev react react-dom</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>react-http-client install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>install --save-dev react-http-client</arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -93,8 +143,6 @@
                 </executions>
                 <configuration>
                     <nodeVersion>v14.18.0</nodeVersion>
-                    <npmVersion>2.15.9</npmVersion>
-                    <installDirectory>./</installDirectory>
                 </configuration>
             </plugin>
         </plugins>

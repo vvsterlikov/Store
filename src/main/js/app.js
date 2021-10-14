@@ -1,6 +1,6 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const client = require('./client');
+const client = require('react-http-client');
 class App extends React.Component {
 
 	constructor(props) {
