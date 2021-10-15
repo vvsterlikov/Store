@@ -124,13 +124,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>react-http-client install</id>
+                        <id>rest install</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>install --save-dev react-http-client</arguments>
+                            <arguments>install --save-dev rest</arguments>
                         </configuration>
                     </execution>
                     <execution>

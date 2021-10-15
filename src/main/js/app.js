@@ -1,40 +1,70 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const client = require('react-http-client');
+const client = require('rest');
+
 class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {productCategory: []};
+		this.state = {productCategories: []};
 	}
 
 	componentDidMount() {
-		client({method: 'GET', path: '/api/productCategory'}).done(response => {
-			this.setState({productCategory: response.entity._embedded.employees});
-		});
+        /*
+        client({method: 'GET', path: '/api/productCategories'})
+		    .done(response => {this.setState({productCategories: response.entity._embedded.productCategories})
+                                }
+            );
+            */
+
+        client('/api/productCategories')
+            .then(response => {this.setState({productCategories : response.entity._embedded.productCategories})})
+            .catch(console.log("err"));
+        /*
+		client('/api/productCategories')
+		    .then(response => { for (prop in response) {
+		                            console.log(`response[${prop}]=${response[prop]}`);
+		                        }
+		    });
+		    */
+
 	}
 
 	render() {
 		return (
-			<ProductCategory productCategory={this.state.productCategory}/>
+			<ProductCategoriesTable productCategories={this.state.productCategories}/>
+			/*<div>test</div>*/
 		)
 	}
 }
 
-class EmployeeList extends React.Component{
+class ProductCategoriesTable extends React.Component{
 	render() {
-		const productCategory = this.props.productCategory.map(prodcat =>
-			<ProductCategory key={prodcat._links.self.href} productCategory={productCategory}/>
-		);
+		const productCategories= this.props.productCategories
+		    .map(elem => <ProductCategory key={elem._links.self.href} productCategory={productCategory}/>);
 		return (
 			<table>
-				<tbody>
-					<tr>
-						<th>Name</th>
-					</tr>
-					{productCategory}
-				</tbody>
+				<tr>
+					<th>Категория товара</th>
+				</tr>
+
+					{productCategories}
 			</table>
 		)
 	}
 }
+
+class ProductCategory extends React.Component {
+    render() {
+        return(
+            <tr>
+                <td>{this.props.productCategory.name}</td>
+            </tr>
+        )
+    }
+}
+
+ReactDOM.render(
+    <App />,
+    document.getElementById('react')
+)
