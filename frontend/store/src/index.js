@@ -32,8 +32,8 @@ class App extends React.Component {
 
 	render() {
 		return (
-			<ProductCategoriesTable productCategories={this.state.productCategories}/>
-			/*<div>test</div>*/
+			/*<ProductCategoriesTable productCategories={this.state.productCategories}/>*/
+			<div>test2</div>
 		)
 	}
 }
