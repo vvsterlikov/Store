@@ -16,10 +16,8 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		console.log("constructor");
 		this.state = {
 			productCategories: [],
-			testprop : "",
 		};
 	}
 
@@ -55,7 +53,10 @@ class App extends React.Component {
 
 	render() {
 		return (
-			<ProductCategoriesTable productCategories={this.state.productCategories}/>
+			<div>
+				<ProductCategoriesTable productCategories={this.state.productCategories} />
+				<ListApplet />
+			</div>
 		)
 	}
 }
@@ -84,6 +85,62 @@ class ProductCategory extends React.Component {
             </tr>
         )
     }
+}
+
+class ListApplet extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			mode : 'READ',
+			columns : [],
+		};
+	}
+	drawTopButtons() {
+		if (this.state.mode == 'READ') {
+			return <button type='button'>+</button>;
+		}
+		return "";
+	}
+	render() {
+		return(
+			<div>
+				<div>
+					{this.drawTopButtons()}
+				</div>
+				<div>
+					<table>
+						<tr>
+							<td>строка 1 колонка 1</td>
+							<td><Control type='readOnlyText' text='text_to_read'/></td>
+						</tr>
+						<tr>
+							<td><Control type='editText' text='text_to_write'/></td>
+							<td>строка 2 колонка 2</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		)
+	}
+}
+
+class Control extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		let control;
+		if (this.props.type == 'button') {
+			control = <button type='button'>{this.props.name}</button>
+		}
+		else if (this.props.type == 'readOnlyText') {
+			control = <div>{this.props.text}</div>	
+		}
+		else if (this.props.type == 'editText') {
+			control = <input type="text" size="10" value={this.props.text}></input>	
+		}
+		return(control);
+	}
 }
 
 ReactDOM.render(
