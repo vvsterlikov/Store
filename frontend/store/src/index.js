@@ -55,7 +55,7 @@ class App extends React.Component {
 		return (
 			<div>
 				<ProductCategoriesTable productCategories={this.state.productCategories} />
-				<ListApplet />
+				<ListApplet rows={this.state.productCategories} />
 			</div>
 		)
 	}
@@ -103,11 +103,21 @@ class ListApplet extends React.Component {
 		return "";
 	}
 	drawTableBody() {
+		let result;
 		if (this.state.mode == 'READ') {
 			for (r of this.state.rows) {
-				
+				result += <tr>;
+				result += </tr>;
 			}
 		}
+	}
+	drawRow(row) {
+		const cols = row.map(col => <td key={row.name}>{row.val}</td>);
+		return(
+			<tr>
+				{cols}
+			</tr>
+		) 
 	}
 	render() {
 		return(
@@ -125,6 +135,7 @@ class ListApplet extends React.Component {
 							<td><Control type='editText' text='text_to_write'/></td>
 							<td>строка 2 колонка 2</td>
 						</tr>
+						{this.drawTableBody()}
 					</table>
 				</div>
 			</div>
