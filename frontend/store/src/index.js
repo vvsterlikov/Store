@@ -92,7 +92,8 @@ class ListApplet extends React.Component {
 		super(props);
 		this.state = {
 			mode : 'READ',
-			columns : [],
+			columns : props.columns,
+			rows : props.rows,
 		};
 	}
 	drawTopButtons() {
@@ -100,6 +101,13 @@ class ListApplet extends React.Component {
 			return <button type='button'>+</button>;
 		}
 		return "";
+	}
+	drawTableBody() {
+		if (this.state.mode == 'READ') {
+			for (r of this.state.rows) {
+				
+			}
+		}
 	}
 	render() {
 		return(
@@ -127,8 +135,12 @@ class ListApplet extends React.Component {
 class Control extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			text : props.text,
+		}
 	}
 	render() {
+		console.log("control render");
 		let control;
 		if (this.props.type == 'button') {
 			control = <button type='button'>{this.props.name}</button>
@@ -137,8 +149,9 @@ class Control extends React.Component {
 			control = <div>{this.props.text}</div>	
 		}
 		else if (this.props.type == 'editText') {
-			control = <input type="text" size="10" value={this.props.text}></input>	
+			control = <input type="text" size="10" value={this.state.text} onChange={event => this.setState({text : event.target.value})}></input>	
 		}
+		console.log("this.state.text="+this.state.text);
 		return(control);
 	}
 }
