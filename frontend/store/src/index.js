@@ -99,23 +99,20 @@ class ListApplet extends React.Component {
 			columns : props.columns,
 			rows : props.rows,
 		};
+		//this.drawListApplet = this.drawListApplet.bind(this);
 	}
 	drawTopButtons() {
 		if (this.state.mode == 'READ') {
 			return <button type='button'>+</button>;
 		}
-		return "";
+		return null;
 	}
 	drawTableBody() {
-		<table>{this.drawRows(this.state.rows)}</table>
-	}
-	drawRows(rows) {
-		const rowsHtml = rows.map(row => <tr key={rows.indexOf(row)}>{row.val}</tr>);
-		return(this.drawCols(rowsHtml)); 
-	}
-	drawCols(row) {
-		const cols = row.cols.map(col => <td key={col.name}><Control type='editText' /></td>);
-		return({cols});
+		return (<table>{
+			this.state.rows.map((row, rowIndex) => <tr key={rowIndex}>{
+				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
+			}</tr>)
+		}</table>);
 	}
 	render() {
 		return(
@@ -124,17 +121,7 @@ class ListApplet extends React.Component {
 					{this.drawTopButtons()}
 				</div>
 				<div>
-					<table>
-						<tr>
-							<td>строка 1 колонка 1</td>
-							<td><Control type='readOnlyText' text='text_to_read'/></td>
-						</tr>
-						<tr>
-							<td><Control type='editText' text='text_to_write'/></td>
-							<td>строка 2 колонка 2</td>
-						</tr>
-						{this.drawTableBody()}
-					</table>
+					{this.drawTableBody()}
 				</div>
 			</div>
 		)
