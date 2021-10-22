@@ -52,10 +52,14 @@ class App extends React.Component {
 	}
 
 	render() {
+		const testTable = [
+			[{name : "name11", value : "value11"},{name : "name12", value : "value12"}],
+			[{name : "name21", value : "value21"},{name : "name22", value : "value22"}]
+		];
 		return (
 			<div>
 				<ProductCategoriesTable productCategories={this.state.productCategories} />
-				<ListApplet rows={this.state.productCategories} />
+				<ListApplet rows={testTable} />
 			</div>
 		)
 	}
@@ -103,21 +107,15 @@ class ListApplet extends React.Component {
 		return "";
 	}
 	drawTableBody() {
-		let result;
-		if (this.state.mode == 'READ') {
-			for (r of this.state.rows) {
-				result += <tr>;
-				result += </tr>;
-			}
-		}
+		<table>{this.drawRows(this.state.rows)}</table>
 	}
-	drawRow(row) {
-		const cols = row.map(col => <td key={row.name}>{row.val}</td>);
-		return(
-			<tr>
-				{cols}
-			</tr>
-		) 
+	drawRows(rows) {
+		const rowsHtml = rows.map(row => <tr key={rows.indexOf(row)}>{row.val}</tr>);
+		return(this.drawCols(rowsHtml)); 
+	}
+	drawCols(row) {
+		const cols = row.cols.map(col => <td key={col.name}><Control type='editText' /></td>);
+		return({cols});
 	}
 	render() {
 		return(
