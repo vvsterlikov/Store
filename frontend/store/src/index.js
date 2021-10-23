@@ -103,13 +103,17 @@ class App extends React.Component {
 			let name1 = this.toNameValueArray(this.state.productCategories,["name"])[0];
 			console.log("name1="+printObject(name1));
 		}
-		return (
-			<div>
-				<ProductCategoriesTable productCategories={this.state.productCategories} />
-				<ListApplet rows={this.toNameValueArray(this.state.productCategories,["name"])} />
-			</div>
-		)
-
+		//if (this.state.productCategories.length > 0) {
+			let rowsCateg = this.toNameValueArray(this.state.productCategories,["name"]);
+			console.log("rowsCateg="+rowsCateg);
+			return (
+				<div>
+					<ProductCategoriesTable productCategories={this.state.productCategories} />
+					<ListApplet rows={rowsCateg} />
+				</div>
+			)
+		//}
+		//return null;
 	}
 }
 
@@ -142,6 +146,7 @@ class ProductCategory extends React.Component {
 class ListApplet extends React.Component {
 	constructor(props) {
 		super(props);
+		console.log("child constructor");
 		this.state = {
 			mode : 'READ',
 			columns : props.columns,
@@ -149,27 +154,31 @@ class ListApplet extends React.Component {
 		};
 		//this.drawListApplet = this.drawListApplet.bind(this);
 	}
+	componentDidMount() {
+		console.log("child component did mount");
+	}
 	drawTopButtons() {
 		if (this.state.mode == 'READ') {
 			return <button type='button'>+</button>;
 		}
 		return null;
 	}
-	drawTableBody() {
+	drawTableBody(rows) {
 		return (<table>{
-			this.state.rows.map((row, rowIndex) => <tr key={rowIndex}>{
+			rows.map((row, rowIndex) => <tr key={rowIndex}>{
 				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
 			}</tr>)
 		}</table>);
 	}
 	render() {
+		console.log("render child="+this.state.rows);
 		return(
 			<div>
 				<div>
 					{this.drawTopButtons()}
 				</div>
 				<div>
-					{this.drawTableBody()}
+					{this.drawTableBody(this.props.rows)}
 				</div>
 			</div>
 		)
