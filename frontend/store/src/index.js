@@ -14,6 +14,19 @@ const baseRegistry = require('rest/mime/registry');
 
 const registry = baseRegistry.child();
 */
+function printObject(obj) {
+	console.log("{");
+	for (let prop in obj) {
+		if (typeof obj[prop] == "object") {
+			printObject(obj[prop]);
+		}
+		else {
+			console.log(`obj[${prop}]=${obj[prop]}`);
+		}
+	}
+	console.log("}");
+}
+
 class App extends React.Component {
 
 	constructor(props) {
@@ -53,10 +66,16 @@ class App extends React.Component {
 
 	}
 	toNameValueArray(arr, propsFilter) {
-		let result;
-		for (let elem in arr) {
-			let tmp = 
+		let result = [];
+		for (let row of arr) {
+			let tmp = [];
+			for (let col in row) {
+				if (propsFilter.includes(col))
+					tmp.push({name : col, value : row[col]})
+			}
+			result.push(tmp);
 		}
+		return result;
 	}
 
 	render() {
@@ -71,12 +90,26 @@ class App extends React.Component {
 		//if (this.state.productCategories.length > 0) {
 		//	console.log(`productCategories[0].name=${this.state.productCategories[0].name}`);
 		//}
+		/*
+		console.log("test begin");
+		if (this.state.productCategories.length > 0) {
+			printObject(this.toNameValueArray(this.state.productCategories,["name"]));
+			//for (let e in this.toNameValueArray(this.state.productCategories,["name"])) {
+		}
+		console.log("test end");
+		*/
+//		return(<div>test</div>);
+		if (this.state.productCategories.length > 0) {
+			let name1 = this.toNameValueArray(this.state.productCategories,["name"])[0];
+			console.log("name1="+printObject(name1));
+		}
 		return (
 			<div>
 				<ProductCategoriesTable productCategories={this.state.productCategories} />
-				<ListApplet rows={this.state.productCategories} />
+				<ListApplet rows={this.toNameValueArray(this.state.productCategories,["name"])} />
 			</div>
 		)
+
 	}
 }
 
@@ -125,7 +158,7 @@ class ListApplet extends React.Component {
 	drawTableBody() {
 		return (<table>{
 			this.state.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.name}/></td>)
+				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
 			}</tr>)
 		}</table>);
 	}
