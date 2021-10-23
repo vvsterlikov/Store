@@ -3,6 +3,8 @@ const ReactDOM = require('react-dom');
 
 const rest = require('rest');
 const mime = require('rest/interceptor/mime');
+
+let renderCount = 0;
 /*
 const defaultRequest = require('rest/interceptor/defaultRequest');
 const mime = require('rest/interceptor/mime');
@@ -50,16 +52,29 @@ class App extends React.Component {
 		  */  
 
 	}
+	toNameValueArray(arr, propsFilter) {
+		let result;
+		for (let elem in arr) {
+			let tmp = 
+		}
+	}
 
 	render() {
+		console.log(`renderCount: ${renderCount++}`);
 		const testTable = [
 			[{name : "name11", value : "value11"},{name : "name12", value : "value12"}],
 			[{name : "name21", value : "value21"},{name : "name22", value : "value22"}]
 		];
+		//for (let elem in this.state.productCategories[0]) {
+		//	console.log(`productCategories[0][${elem}]=${this.state.productCategories[0][elem]}`);
+		//}
+		//if (this.state.productCategories.length > 0) {
+		//	console.log(`productCategories[0].name=${this.state.productCategories[0].name}`);
+		//}
 		return (
 			<div>
 				<ProductCategoriesTable productCategories={this.state.productCategories} />
-				<ListApplet rows={testTable} />
+				<ListApplet rows={this.state.productCategories} />
 			</div>
 		)
 	}
@@ -110,7 +125,7 @@ class ListApplet extends React.Component {
 	drawTableBody() {
 		return (<table>{
 			this.state.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
+				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.name}/></td>)
 			}</tr>)
 		}</table>);
 	}
@@ -136,7 +151,6 @@ class Control extends React.Component {
 		}
 	}
 	render() {
-		console.log("control render");
 		let control;
 		if (this.props.type == 'button') {
 			control = <button type='button'>{this.props.name}</button>
@@ -147,7 +161,6 @@ class Control extends React.Component {
 		else if (this.props.type == 'editText') {
 			control = <input type="text" size="10" value={this.state.text} onChange={event => this.setState({text : event.target.value})}></input>	
 		}
-		console.log("this.state.text="+this.state.text);
 		return(control);
 	}
 }
