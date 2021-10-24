@@ -5,27 +5,6 @@ const rest = require('rest');
 const mime = require('rest/interceptor/mime');
 
 let renderCount = 0;
-/*
-const defaultRequest = require('rest/interceptor/defaultRequest');
-const mime = require('rest/interceptor/mime');
-const uriTemplateInterceptor = require('./api/uriTemplateInterceptor');
-const errorCode = require('rest/interceptor/errorCode');
-const baseRegistry = require('rest/mime/registry');
-
-const registry = baseRegistry.child();
-*/
-function printObject(obj) {
-	console.log("{");
-	for (let prop in obj) {
-		if (typeof obj[prop] == "object") {
-			printObject(obj[prop]);
-		}
-		else {
-			console.log(`obj[${prop}]=${obj[prop]}`);
-		}
-	}
-	console.log("}");
-}
 
 class App extends React.Component {
 
@@ -33,37 +12,19 @@ class App extends React.Component {
 		super(props);
 		this.state = {
 			productCategories: [],
+			productCategoriesNameValue: [],
 		};
 	}
 
 	componentDidMount() {
-		/*
-		registry.register('text/uri-list', require('./api/uriListConverter'));
-		registry.register('application/hal+json', require('rest/mime/type/application/hal'));
-
-		const client = rest
-			.wrap(mime, { registry: registry })
-			.wrap(uriTemplateInterceptor)
-			.wrap(errorCode)
-			.wrap(defaultRequest, { headers: { 'Accept': 'application/hal+json' }});
-        client({method: 'GET', path: '/api/productCategories'})
-		    .done(response => {
-		    	this.setState({productCategories: response.entity._embedded.productCategories})
-			});
-
-		*/
+		//тянем данные из бэка и сохраняем в стейт
 		const client = rest.wrap(mime);
         client({path: '/api/productCategories'}).then(response => {
-        	this.setState({productCategories : response.entity._embedded.productCategories});
+        	this.setState({
+        		productCategories : response.entity._embedded.productCategories,
+        		productCategoriesNameValue : this.toNameValueArray(response.entity._embedded.productCategories,["name"]),
+        	});
         });
-        /*
-    	client('/api/productCategories')
-		    .then(response => { for (prop in this.state.productCategories) {
-		                            console.log(`response[${prop}]=${response[prop]}`);
-		                        }
-		    });
-		  */  
-
 	}
 	toNameValueArray(arr, propsFilter) {
 		let result = [];
@@ -77,43 +38,34 @@ class App extends React.Component {
 		}
 		return result;
 	}
+	addNewRecord() {
+		console.log("add record pressed");
+		let newProductCategoriesNameValue = this.state.productCategoriesNameValue.slice();
+		let row = [];
+		for (let elem in newProductCategoriesNameValue[0]) {
+			row.push({name : elem.name, value : ""})
+		}
+		newProductCategoriesNameValue.push(row);
+		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
+
+	}
+	cancelNewRecord() {
+		console.log("cancel record pressed");
+		let newProductCategoriesNameValue = this.state.productCategoriesNameValue.slice();
+		newProductCategoriesNameValue.pop();
+		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
+	}
+	saveRecords() {
+		console.log("save invoked");
+	}
 
 	render() {
-		console.log(`renderCount: ${renderCount++}`);
-		const testTable = [
-			[{name : "name11", value : "value11"},{name : "name12", value : "value12"}],
-			[{name : "name21", value : "value21"},{name : "name22", value : "value22"}]
-		];
-		//for (let elem in this.state.productCategories[0]) {
-		//	console.log(`productCategories[0][${elem}]=${this.state.productCategories[0][elem]}`);
-		//}
-		//if (this.state.productCategories.length > 0) {
-		//	console.log(`productCategories[0].name=${this.state.productCategories[0].name}`);
-		//}
-		/*
-		console.log("test begin");
-		if (this.state.productCategories.length > 0) {
-			printObject(this.toNameValueArray(this.state.productCategories,["name"]));
-			//for (let e in this.toNameValueArray(this.state.productCategories,["name"])) {
-		}
-		console.log("test end");
-		*/
-//		return(<div>test</div>);
-		if (this.state.productCategories.length > 0) {
-			let name1 = this.toNameValueArray(this.state.productCategories,["name"])[0];
-			console.log("name1="+printObject(name1));
-		}
-		//if (this.state.productCategories.length > 0) {
-			let rowsCateg = this.toNameValueArray(this.state.productCategories,["name"]);
-			console.log("rowsCateg="+rowsCateg);
-			return (
-				<div>
-					<ProductCategoriesTable productCategories={this.state.productCategories} />
-					<ListApplet rows={rowsCateg} />
-				</div>
-			)
-		//}
-		//return null;
+		return (
+			<div>
+				
+				<ListApplet rows={this.state.productCategoriesNameValue} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
+			</div>
+		)
 	}
 }
 
@@ -152,32 +104,51 @@ class ListApplet extends React.Component {
 			columns : props.columns,
 			rows : props.rows,
 		};
-		//this.drawListApplet = this.drawListApplet.bind(this);
 	}
 	componentDidMount() {
 		console.log("child component did mount");
 	}
 	drawTopButtons() {
 		if (this.state.mode == 'RW') {
-			return <button type='button' onClick={this.toggleHeader()}>+</button>;
+			return( 
+				<div>
+					<button type='button' onClick={() => this.toggleTopButtons()}>Добавить</button>
+					<button type='button' onClick={() => this.props.save()}>Сохранить</button>
+				</div>)
+		}
+		else if (this.state.mode == 'ADD') {
+			return (
+				<div>
+					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
+					<button type='button' onClick={() => this.props.save()}>Сохранить</button>
+				</div>
+				)
 		}
 		return null;
 	}
-	toggleHeader() {
+	toggleTopButtons() {
 		console.log("toggleHeader");
 		if (this.state.mode == 'RW') {
-			this.setState({mode : 'ADDRECORD'})
+			this.setState({mode : 'ADD'})
+			this.props.add();
 		}
 		else {
 			this.setState({mode : 'RW'})	
+			this.props.cancel();
 		}
 	}
-	drawTableBody(rows) {
-		return (<table>{
-			rows.map((row, rowIndex) => <tr key={rowIndex}>{
-				row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
-			}</tr>)
-		}</table>);
+	drawTableBody() {
+		if (this.props.rows.length > 0) {
+			return (<table>
+				<tr>{this.props.rows[0].map((header,headerIndex) => <td key={headerIndex}>{header.name}</td>)}</tr>
+				{this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
+					row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
+				}</tr>)}
+			</table>);
+		}
+		else {
+			return(<div>Нет записей</div>)
+		}
 	}
 	render() {
 		console.log("render child="+this.state.mode);
@@ -187,7 +158,7 @@ class ListApplet extends React.Component {
 					{this.drawTopButtons()}
 				</div>
 				<div>
-					{this.drawTableBody(this.props.rows)}
+					{this.drawTableBody()}
 				</div>
 			</div>
 		)
