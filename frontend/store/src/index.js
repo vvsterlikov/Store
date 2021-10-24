@@ -148,7 +148,7 @@ class ListApplet extends React.Component {
 		super(props);
 		console.log("child constructor");
 		this.state = {
-			mode : 'READ',
+			mode : 'RW',
 			columns : props.columns,
 			rows : props.rows,
 		};
@@ -158,10 +158,19 @@ class ListApplet extends React.Component {
 		console.log("child component did mount");
 	}
 	drawTopButtons() {
-		if (this.state.mode == 'READ') {
-			return <button type='button'>+</button>;
+		if (this.state.mode == 'RW') {
+			return <button type='button' onClick={this.toggleHeader()}>+</button>;
 		}
 		return null;
+	}
+	toggleHeader() {
+		console.log("toggleHeader");
+		if (this.state.mode == 'RW') {
+			this.setState({mode : 'ADDRECORD'})
+		}
+		else {
+			this.setState({mode : 'RW'})	
+		}
 	}
 	drawTableBody(rows) {
 		return (<table>{
@@ -171,7 +180,7 @@ class ListApplet extends React.Component {
 		}</table>);
 	}
 	render() {
-		console.log("render child="+this.state.rows);
+		console.log("render child="+this.state.mode);
 		return(
 			<div>
 				<div>
