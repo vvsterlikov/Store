@@ -3,8 +3,11 @@ const ReactDOM = require('react-dom');
 
 const rest = require('rest');
 const mime = require('rest/interceptor/mime');
+const follow = require('./follow.js');
+const client = require('./client.js');
 
 let renderCount = 0;
+
 
 class App extends React.Component {
 
@@ -18,8 +21,16 @@ class App extends React.Component {
 
 	componentDidMount() {
 		//тянем данные из бэка и сохраняем в стейт
-		const client = rest.wrap(mime);
-        client({path: '/api/productCategories'}).then(response => {
+
+		console.log("misc demo study BEGIN");
+
+		follow("Demo1");
+
+
+		console.log("misc demo study END");
+
+		//const client = rest.wrap(mime);
+        client({method: 'GET', path: '/api/productCategories'}).then(response => {
         	this.setState({
         		productCategories : response.entity._embedded.productCategories,
         		productCategoriesNameValue : this.toNameValueArray(response.entity._embedded.productCategories,["name"]),
