@@ -16,7 +16,28 @@ class App extends React.Component {
 		this.state = {
 			productCategories: [],
 			productCategoriesNameValue: [],
+			response : {},
 		};
+	}
+	loadFromServer(pageSize) {
+		follow(client, root, [
+			{rel: 'employees', params: {size: pageSize}}]
+		).then(employeeCollection => {
+			return client({
+				method: 'GET',
+				path: employeeCollection.entity._links.profile.href,
+				headers: {'Accept': 'application/schema+json'}
+			}).then(schema => {
+				this.schema = schema.entity;
+				return employeeCollection;
+			});
+		}).done(employeeCollection => {
+			this.setState({
+				employees: employeeCollection.entity._embedded.employees,
+				attributes: Object.keys(this.schema.properties),
+				pageSize: pageSize,
+				links: employeeCollection.entity._links});
+		});
 	}
 
 	componentDidMount() {
@@ -24,12 +45,22 @@ class App extends React.Component {
 
 		console.log("misc demo study BEGIN");
 
-		follow("Demo1");
+		//follow("Demo1");
+
+		
 
 
 		console.log("misc demo study END");
 
 		//const client = rest.wrap(mime);
+        client({method: 'GET', path: '/api'}).then(response => {
+        	this.setState({
+        		response : response,
+        	});
+        });
+
+
+
         client({method: 'GET', path: '/api/productCategories'}).then(response => {
         	this.setState({
         		productCategories : response.entity._embedded.productCategories,
