@@ -7,6 +7,7 @@ const follow = require('./follow.js');
 const client = require('./client.js');
 
 let renderCount = 0;
+const root = '/api';
 
 
 class App extends React.Component {
@@ -17,26 +18,32 @@ class App extends React.Component {
 			productCategories: [],
 			productCategoriesNameValue: [],
 			response : {},
+			pageSize : 0,
+			links : [],
+			attributes : [],
 		};
 	}
 	loadFromServer(pageSize) {
-		follow(client, root, [
-			{rel: 'employees', params: {size: pageSize}}]
-		).then(employeeCollection => {
+		follow(client, root, [{rel: 'productCategories', params: {size: pageSize}}]
+		).then(productCategoryCollection => {
+			console.log("22="+productCategoryCollection.entity._links.profile.href);
 			return client({
 				method: 'GET',
-				path: employeeCollection.entity._links.profile.href,
+				path: productCategoryCollection.entity._links.profile.href,
 				headers: {'Accept': 'application/schema+json'}
 			}).then(schema => {
+				console.log("33");
 				this.schema = schema.entity;
-				return employeeCollection;
+				return productCategoryCollection;
 			});
-		}).done(employeeCollection => {
+		}).then(productCategoryCollection => {
+			console.log("44");
 			this.setState({
-				employees: employeeCollection.entity._embedded.employees,
+				productCategories: productCategoryCollection.entity._embedded.productCategories,
+				productCategoriesNameValue : this.toNameValueArray(productCategoryCollection.entity._embedded.productCategories,["name"]),
 				attributes: Object.keys(this.schema.properties),
 				pageSize: pageSize,
-				links: employeeCollection.entity._links});
+				links: productCategoryCollection.entity._links});
 		});
 	}
 
@@ -47,26 +54,43 @@ class App extends React.Component {
 
 		//follow("Demo1");
 
-		
+		let p = new Promise((resolve,reject) => {
+			setTimeout(() => resolve({status : "resolved"}),7000);
+		});
 
+		p.then(res => 
+			{
+				console.log(res.status);
+				return new Promise((res,rej)=> {setTimeout(() => {res("resolved1")},3000)});
+		}).then(res => console.log(res));
+
+
+		let fun1 = () => "1";
+		let fun2 = () => {"1"};
+
+		console.log("fun1="+fun1());
+		console.log("fun2="+fun2());
+		
+		this.loadFromServer(10);
 
 		console.log("misc demo study END");
 
 		//const client = rest.wrap(mime);
-        client({method: 'GET', path: '/api'}).then(response => {
-        	this.setState({
-        		response : response,
-        	});
-        });
+        //client({method: 'GET', path: '/api'}).then(response => {
+        //	this.setState({
+		//        		response : response,
+        //	});
+        //});
 
 
-
+        /*
         client({method: 'GET', path: '/api/productCategories'}).then(response => {
         	this.setState({
         		productCategories : response.entity._embedded.productCategories,
         		productCategoriesNameValue : this.toNameValueArray(response.entity._embedded.productCategories,["name"]),
         	});
         });
+        */
 	}
 	toNameValueArray(arr, propsFilter) {
 		let result = [];
