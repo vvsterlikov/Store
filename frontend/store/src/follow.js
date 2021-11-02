@@ -9,7 +9,7 @@ module.exports = (api, rootPath, relArray) => {
 	
 	function traverseNext(root, rel, arrayItem) {
 		return root.then(response => {
-			console.log("1");/////run here
+			console.log(" response.entity._links[rel].href="+response.entity._links[rel].href);/////run here
 			if (hasEmbeddedRel(response.entity, rel)) {
 				console.log("2");
 				return response.entity._embedded[rel];

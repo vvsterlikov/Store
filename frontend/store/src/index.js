@@ -53,7 +53,7 @@ class App extends React.Component {
 		console.log("misc demo study BEGIN");
 
 		//follow("Demo1");
-
+		/*
 		let p = new Promise((resolve,reject) => {
 			setTimeout(() => resolve({status : "resolved"}),7000);
 		});
@@ -70,17 +70,13 @@ class App extends React.Component {
 
 		console.log("fun1="+fun1());
 		console.log("fun2="+fun2());
-		
+		*/
 		this.loadFromServer(10);
 
 		console.log("misc demo study END");
 
 		//const client = rest.wrap(mime);
-        //client({method: 'GET', path: '/api'}).then(response => {
-        //	this.setState({
-		//        		response : response,
-        //	});
-        //});
+        client({method: 'GET', path: '/api'}).then(response => {let r = response;});
 
 
         /*
