@@ -11,15 +11,17 @@ public class ProductCategory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+    private String code;
 
     protected ProductCategory() {}
 
-    public ProductCategory(String name) {
+    public ProductCategory(String name, String code) {
         this.name = name;
+        this.code = code;
     }
     @Override
     public String toString() {
-        return String.format("ProductCategory[id=%d,name=%s]",id,name);
+        return String.format("ProductCategory[id=%d,name=%s,code=%s]",id,name,code);
     }
     public Long getId() {
         return id;
@@ -27,4 +29,5 @@ public class ProductCategory {
     public String getName() {
         return name;
     }
+    public String getCode() { return code;}
 }

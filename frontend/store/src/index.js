@@ -40,7 +40,6 @@ class App extends React.Component {
 			console.log("44");
 			this.setState({
 				productCategories: productCategoryCollection.entity._embedded.productCategories,
-				productCategoriesNameValue : this.toNameValueArray(productCategoryCollection.entity._embedded.productCategories,["name"]),
 				attributes: Object.keys(this.schema.properties),
 				pageSize: pageSize,
 				links: productCategoryCollection.entity._links});
@@ -88,18 +87,7 @@ class App extends React.Component {
         });
         */
 	}
-	toNameValueArray(arr, propsFilter) {
-		let result = [];
-		for (let row of arr) {
-			let tmp = [];
-			for (let col in row) {
-				if (propsFilter.includes(col))
-					tmp.push({name : col, value : row[col]})
-			}
-			result.push(tmp);
-		}
-		return result;
-	}
+
 	addNewRecord() {
 		console.log("add record pressed");
 		let newProductCategoriesNameValue = this.state.productCategoriesNameValue.slice();
@@ -124,38 +112,12 @@ class App extends React.Component {
 	render() {
 		return (
 			<div>
-				
-				<ListApplet rows={this.state.productCategoriesNameValue} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
+				<ListApplet header={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
 			</div>
 		)
 	}
 }
 
-class ProductCategoriesTable extends React.Component{
-	render() {
-		const productCategories = this.props.productCategories
-		    .map(elem => <ProductCategory key={elem._links.self.href} productCategory={elem}/>);
-		return (
-			<table>
-				<tr>
-					<th>Категория товара</th>
-				</tr>
-
-					{productCategories}
-			</table>
-		)
-	}
-}
-
-class ProductCategory extends React.Component {
-    render() {
-        return(
-            <tr>
-                <td>{this.props.productCategory.name}</td>
-            </tr>
-        )
-    }
-}
 
 class ListApplet extends React.Component {
 	constructor(props) {
@@ -202,9 +164,9 @@ class ListApplet extends React.Component {
 	drawTableBody() {
 		if (this.props.rows.length > 0) {
 			return (<table>
-				<tr>{this.props.rows[0].map((header,headerIndex) => <td key={headerIndex}>{header.name}</td>)}</tr>
+				<tr>{this.props.header.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
 				{this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-					row.map((col,colIndex)=><td key={colIndex}><Control type="editText" text={col.value}/></td>)
+					this.props.header.map((col) => <td key={col+rowIndex}><Control type="editText" text={row[col]}/></td>)
 				}</tr>)}
 			</table>);
 		}
@@ -246,6 +208,21 @@ class Control extends React.Component {
 			control = <input type="text" size="10" value={this.state.text} onChange={event => this.setState({text : event.target.value})}></input>	
 		}
 		return(control);
+	}
+}
+
+class CreateDialog extends React.Component {
+	constructor(props) {
+		super(props)
+	}
+	handleSubmit(e) {
+		e.preventDefault();
+		const newProductCategory = {};
+		this.props.attributes.forEach(attribute => {newProductCategory[attribute] = ReactDOM.fin});
+	}
+	render() {
+		return(
+		);
 	}
 }
 

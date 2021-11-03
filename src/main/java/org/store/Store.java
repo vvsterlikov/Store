@@ -18,8 +18,8 @@ public class Store {
     @Bean
     public CommandLineRunner demo(ProductCategoryRepository productCategoryRepository) {
         return (args) -> {
-            productCategoryRepository.save(new ProductCategory("Компьютеры"));
-            productCategoryRepository.save(new ProductCategory("Ноутбуки"));
+            productCategoryRepository.save(new ProductCategory("Компьютеры", "Computers"));
+            productCategoryRepository.save(new ProductCategory("Ноутбуки", "Notebooks"));
 
             log.info("Выбираем категории из БД");
             for (ProductCategory pc : productCategoryRepository.findAll()) {
