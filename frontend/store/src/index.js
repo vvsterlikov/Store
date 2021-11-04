@@ -138,18 +138,23 @@ class ListApplet extends React.Component {
 			return( 
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Добавить</button>
-					<button type='button' onClick={() => this.props.save()}>Сохранить</button>
+					<button type='button' onClick={() => this.save()}>Сохранить</button>
 				</div>)
 		}
 		else if (this.state.mode == 'ADD') {
 			return (
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
-					<button type='button' onClick={() => this.props.save()}>Сохранить</button>
+					<button type='button' onClick={() => this.save()}>Сохранить</button>
 				</div>
 				)
 		}
 		return null;
+	}
+	save() {
+		for (attr of this.props.attributes) {
+			console.log(`this.inpRefs[${attr}].value=${this.inpRefs[attr].value}`);
+		}
 	}
 	toggleTopButtons() {
 		console.log("toggleHeader");
@@ -167,10 +172,10 @@ class ListApplet extends React.Component {
 			return (<table>
 				<tr>{this.props.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
 				{this.state.mode == 'RW' && this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-					this.props.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" text={row[col]}/></td>)
+					this.props.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}/></td>)
 				}</tr>)}
 				{this.state.mode == 'ADD' && this.props.attributes.map((col,index) =>
-					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} text={col}/></td>
+					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} value={col}/></td>
 				)}
 			</table>);
 		}
@@ -197,8 +202,8 @@ class Control extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			text : props.text,
-		}
+			value : this.props.value,
+		};
 	}
 	render() {
 		let control;
@@ -206,14 +211,11 @@ class Control extends React.Component {
 			control = <button type='button'>{this.props.name}</button>
 		}
 		else if (this.props.type == 'readOnlyText') {
-			control = <div>{this.props.text}</div>	
+			control = <div>{this.props.value}</div>	
 		}
 		else if (this.props.type == 'editText') {
-			control = <input type="text" 
-				ref={this.props.controlRef}
-				size="10" 
-				value={this.state.text} 
-				onChange={event => this.setState({text : event.target.value})}>
+			control = <input type="text" ref={this.props.controlRef} size="10" value={this.state.value}
+				onChange={(e)=>this.setState({value : e.value})}>
 			</input>	
 		}
 		return(control);
