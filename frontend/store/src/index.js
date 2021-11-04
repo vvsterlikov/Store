@@ -112,7 +112,7 @@ class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<ListApplet header={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
+				<ListApplet attributes={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
 			</div>
 		)
 	}
@@ -122,6 +122,7 @@ class App extends React.Component {
 class ListApplet extends React.Component {
 	constructor(props) {
 		super(props);
+		this.inpRefs = {};
 		console.log("child constructor");
 		this.state = {
 			mode : 'RW',
@@ -164,10 +165,13 @@ class ListApplet extends React.Component {
 	drawTableBody() {
 		if (this.props.rows.length > 0) {
 			return (<table>
-				<tr>{this.props.header.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
-				{this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-					this.props.header.map((col) => <td key={col+rowIndex}><Control type="editText" text={row[col]}/></td>)
+				<tr>{this.props.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
+				{this.state.mode == 'RW' && this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
+					this.props.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" text={row[col]}/></td>)
 				}</tr>)}
+				{this.state.mode == 'ADD' && this.props.attributes.map((col,index) =>
+					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} text={col}/></td>
+				)}
 			</table>);
 		}
 		else {
@@ -205,7 +209,12 @@ class Control extends React.Component {
 			control = <div>{this.props.text}</div>	
 		}
 		else if (this.props.type == 'editText') {
-			control = <input type="text" size="10" value={this.state.text} onChange={event => this.setState({text : event.target.value})}></input>	
+			control = <input type="text" 
+				ref={this.props.controlRef}
+				size="10" 
+				value={this.state.text} 
+				onChange={event => this.setState({text : event.target.value})}>
+			</input>	
 		}
 		return(control);
 	}
@@ -221,8 +230,7 @@ class CreateDialog extends React.Component {
 		this.props.attributes.forEach(attribute => {newProductCategory[attribute] = ReactDOM.fin});
 	}
 	render() {
-		return(
-		);
+		return(null);
 	}
 }
 
