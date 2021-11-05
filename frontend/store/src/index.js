@@ -122,7 +122,7 @@ class App extends React.Component {
 		return (
 			<div>
 				<ListApplet attributes={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
-					sendToBackendHandler={this.sendToBackend}/>
+					save={this.sendToBackend}/>
 			</div>
 		)
 	}
@@ -155,19 +155,19 @@ class ListApplet extends React.Component {
 			return (
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
-					<button type='button' onClick={() => this.save(this.props.sendToBackendHandler)}>Сохранить</button>
+					<button type='button' onClick={() => this.save(this.props.save)}>Сохранить</button>
 				</div>
 				)
 		}
 		return null;
 	}
-	save(saveToBackendHandler) {
+	save(saveHandler) {
 		let newRecord = {};
 		for (attr of this.props.attributes) {
 			//console.log(`this.inpRefs[${attr}].value=${this.inpRefs[attr].value}`);
 			newRecord[attr] = this.inpRefs[attr].value;
 		}
-		saveToBackendHandler(newRecord).then(() => this.setState({mode : 'RW'}));
+		saveHandler(newRecord).then(() => this.setState({mode : 'RW'}));
 	}
 	toggleTopButtons() {
 		console.log("toggleHeader");
