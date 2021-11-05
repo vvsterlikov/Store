@@ -22,6 +22,7 @@ class App extends React.Component {
 			links : [],
 			attributes : [],
 		};
+		this.sendToBackend = this.sendToBackend.bind(this);
 	}
 	loadFromServer(pageSize) {
 		follow(client, root, [{rel: 'productCategories', params: {size: pageSize}}]
@@ -105,14 +106,23 @@ class App extends React.Component {
 		newProductCategoriesNameValue.pop();
 		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
 	}
-	saveRecords() {
-		console.log("save invoked");
+	sendToBackend(newRecord) {
+		console.log("send invoked "+newRecord.name);
+		return follow(client,root,['productCategories']).then(response => {
+			return client({
+				method : 'POST',
+				path : response.entity._links.self.href,
+				entity : newRecord,
+				headers : {'Content-Type' : 'application/json'},
+			});
+		}).then((r) => this.loadFromServer(10));
 	}
 
 	render() {
 		return (
 			<div>
-				<ListApplet attributes={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} save={() => this.saveRecords()}/>
+				<ListApplet attributes={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
+					sendToBackendHandler={this.sendToBackend}/>
 			</div>
 		)
 	}
@@ -145,22 +155,25 @@ class ListApplet extends React.Component {
 			return (
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
-					<button type='button' onClick={() => this.save()}>Сохранить</button>
+					<button type='button' onClick={() => this.save(this.props.sendToBackendHandler)}>Сохранить</button>
 				</div>
 				)
 		}
 		return null;
 	}
-	save() {
+	save(saveToBackendHandler) {
+		let newRecord = {};
 		for (attr of this.props.attributes) {
-			console.log(`this.inpRefs[${attr}].value=${this.inpRefs[attr].value}`);
+			//console.log(`this.inpRefs[${attr}].value=${this.inpRefs[attr].value}`);
+			newRecord[attr] = this.inpRefs[attr].value;
 		}
+		saveToBackendHandler(newRecord).then(() => this.setState({mode : 'RW'}));
 	}
 	toggleTopButtons() {
 		console.log("toggleHeader");
 		if (this.state.mode == 'RW') {
 			this.setState({mode : 'ADD'})
-			this.props.add();
+			//this.props.add();
 		}
 		else {
 			this.setState({mode : 'RW'})	
@@ -215,7 +228,7 @@ class Control extends React.Component {
 		}
 		else if (this.props.type == 'editText') {
 			control = <input type="text" ref={this.props.controlRef} size="10" value={this.state.value}
-				onChange={(e)=>this.setState({value : e.value})}>
+				onChange={(e)=>this.setState({value : e.target.value})}>
 			</input>	
 		}
 		return(control);
