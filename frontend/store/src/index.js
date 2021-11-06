@@ -8,6 +8,7 @@ const client = require('./client.js');
 
 let renderCount = 0;
 const root = '/api';
+const ENTITY_NAME = 'productCategories';
 const DEFAULT_PAGESIZE = 3;
 
 
@@ -15,6 +16,7 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.params = {};
 		this.state = {
 			productCategories: [],
 			productCategoriesNameValue: [],
@@ -49,11 +51,14 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-		let params = {};
-		this.getParams('productCategories').then((result) => {
-			params = result;
-			return result;
-		}).then((result) => client({method : 'GET', path : result.link}));
+
+		this.getParams(ENTITY_NAME).then(params => (
+			this.params = params;
+		)).then(() => getProfile(this.params.profileLink)).then((attributes) => (
+			this.params.attributes = attributes;
+		));
+
+		
 		//тянем данные из бэка и сохраняем в стейт
 
 		console.log("misc demo study BEGIN");
@@ -77,14 +82,14 @@ class App extends React.Component {
 		console.log("fun1="+fun1());
 		console.log("fun2="+fun2());
 		*/
-		this.loadFromServer(DEFAULT_PAGESIZE);
+		//this.loadFromServer(DEFAULT_PAGESIZE);
 
 		console.log("misc demo study END");
 
 		//const client = rest.wrap(mime);
-        client({method: 'GET', path: '/api'}).then(response => {
-        	let r = response;
-        });
+        //client({method: 'GET', path: '/api'}).then(response => {
+        //	let r = response;
+        //});
 
 
         /*
@@ -100,10 +105,18 @@ class App extends React.Component {
 	getParams(entityName) {
 		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {
 			return {
-				link : result.entity._links.self.href,
+				entityLink : result.entity._links.self.href,
+				profileLink : result.entity._links.self.profile,
 				pageSize : result.entity.page.size,
+				totalPages : result.entity.page.totalPages,
 			}
 		});
+	}
+
+	getProfile(profileLink) {
+		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response =>
+			response
+		);
 	}
 
 	addNewRecord() {
@@ -145,7 +158,7 @@ class App extends React.Component {
 	}
 
 	gotoFirstPage(){
-
+		return client({method : 'GET', path : this.params.link, params : {page : 0}});
 	}
 
 	gotoLastPage() {
