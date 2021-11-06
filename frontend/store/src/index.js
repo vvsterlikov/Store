@@ -8,6 +8,7 @@ const client = require('./client.js');
 
 let renderCount = 0;
 const root = '/api';
+const DEFAULT_PAGESIZE = 3;
 
 
 class App extends React.Component {
@@ -48,6 +49,11 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
+		let params = {};
+		this.getParams('productCategories').then((result) => {
+			params = result;
+			return result;
+		}).then((result) => client({method : 'GET', path : result.link}));
 		//тянем данные из бэка и сохраняем в стейт
 
 		console.log("misc demo study BEGIN");
@@ -71,12 +77,14 @@ class App extends React.Component {
 		console.log("fun1="+fun1());
 		console.log("fun2="+fun2());
 		*/
-		this.loadFromServer(10);
+		this.loadFromServer(DEFAULT_PAGESIZE);
 
 		console.log("misc demo study END");
 
 		//const client = rest.wrap(mime);
-        client({method: 'GET', path: '/api'}).then(response => {let r = response;});
+        client({method: 'GET', path: '/api'}).then(response => {
+        	let r = response;
+        });
 
 
         /*
@@ -87,6 +95,15 @@ class App extends React.Component {
         	});
         });
         */
+	}
+
+	getParams(entityName) {
+		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {
+			return {
+				link : result.entity._links.self.href,
+				pageSize : result.entity.page.size,
+			}
+		});
 	}
 
 	addNewRecord() {
@@ -115,7 +132,28 @@ class App extends React.Component {
 				entity : newRecord,
 				headers : {'Content-Type' : 'application/json'},
 			});
-		}).then((r) => this.loadFromServer(10));
+		}).then((r) => this.gotoLastPage());
+	}
+
+	gotoNextPage() {
+
+	}
+
+	gotoPrevPage() {
+
+
+	}
+
+	gotoFirstPage(){
+
+	}
+
+	gotoLastPage() {
+		console.log("gotolastpage");
+		follow(client,root,['productCategories']).then(response => {
+			console.log("resp");
+		})
+
 	}
 
 	render() {
