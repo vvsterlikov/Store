@@ -23,10 +23,12 @@ class App extends React.Component {
 			response : {},
 			pageSize : 0,
 			links : [],
+			page : [],
 			attributes : [],
 			totalPages : 0,
 		};
 		this.sendToBackend = this.sendToBackend.bind(this);
+		this.gotoNextPage = this.gotoNextPage.bind(this);
 	}
 	loadFromServer(pageSize) {
 		follow(client, root, [{rel: 'productCategories', params: {size: pageSize}}]
@@ -56,7 +58,7 @@ class App extends React.Component {
 			this.params = params
 		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
 			this.params.attributes = Object.keys(response.entity.properties);
-		}).then(() => this.gotoLastPage(this.params.entityLink));
+		}).then(() => this.gotoFirstPage(this.params.entityLink));
 	}
 
 	getParams(entityName) {
@@ -102,33 +104,43 @@ class App extends React.Component {
 		}).then((r) => this.gotoLastPage());
 	}
 
-	gotoNextPage(link) {
-
+	gotoNextPage() {
+		console.log("next");
+		client({method : 'GET', path : this.state.links.next.href}).then(response => this.setState({
+			productCategories : response.entity._embedded.productCategories,
+			page : response.entity.page,
+			links : response.entity._links,
+		}));
 	}
 
-	gotoPrevPage(link) {
-
+	gotoPrevPage() {
+		client({method : 'GET', path : this.state.links.prev.href}).then(response => this.setState({
+			productCategories : response.entity._embedded.productCategories,
+			page : response.entity.page,
+			links : response.entity._links,
+		}));
 
 	}
 
 	gotoFirstPage(link){
-		client({method : 'GET', path : link, params : {page : 0}}).then(response =>{
+		client({method : 'GET', path : link}).then(response =>
 			this.setState({
 				productCategories : response.entity._embedded.productCategories,
-				totalPages : response.entity.page.totalPages,
-			});
-		});
+				page : response.entity.page,
+				links : response.entity._links,
+			})
+		);
 	}
 
 	gotoLastPage(link) {
 		client({method : 'GET', path : link, params : {page : 0}})
 			.then(response => response.entity.page.totalPages)
-			.then(totalPages => client({method : 'GET', path : link, params : {page : totalPages-1}}))
+			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
 			.then(response => {
-				console.log("response="+response);
 				this.setState({
-					productCategories : response.entity._embedded.productCategories,
-					totalPages : response.entity.page.totalPages,
+				productCategories : response.entity._embedded.productCategories,
+				page : response.entity.page,
+				links : response.entity._links,
 			})
 		});
 	}
@@ -137,7 +149,8 @@ class App extends React.Component {
 		return (
 			<div>
 				<ListApplet attributes={this.params.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
-					save={this.sendToBackend}/>
+					save={this.sendToBackend}
+					navNext={this.gotoNextPage}/>
 			</div>
 		)
 	}
@@ -159,18 +172,27 @@ class ListApplet extends React.Component {
 		console.log("child component did mount");
 	}
 	drawTopButtons() {
+		const navButtons = <div>
+			<button type='button' onClick={() => this.props.navFirst}>&lt;&lt;</button>
+			<button type='button' onClick={() => this.props.navPrev}>&lt;</button>
+			<button type='button' onClick={() => this.props.navNext}>></button>
+			<button type='button' onClick={() => this.props.navLast}>>></button>
+		</div>
 		if (this.state.mode == 'RW') {
 			return( 
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Добавить</button>
 					<button type='button' onClick={() => this.save()}>Сохранить</button>
-				</div>)
+					{navButtons}
+				</div>
+				)
 		}
 		else if (this.state.mode == 'ADD') {
 			return (
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
 					<button type='button' onClick={() => this.save(this.props.save)}>Сохранить</button>
+					{navButtons}
 				</div>
 				)
 		}
