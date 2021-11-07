@@ -24,6 +24,7 @@ class App extends React.Component {
 			pageSize : 0,
 			links : [],
 			attributes : [],
+			totalPages : 0,
 		};
 		this.sendToBackend = this.sendToBackend.bind(this);
 	}
@@ -51,72 +52,25 @@ class App extends React.Component {
 	}
 
 	componentDidMount() {
-
-		this.getParams(ENTITY_NAME).then(params => (
-			this.params = params;
-		)).then(() => getProfile(this.params.profileLink)).then((attributes) => (
-			this.params.attributes = attributes;
-		));
-
-		
-		//тянем данные из бэка и сохраняем в стейт
-
-		console.log("misc demo study BEGIN");
-
-		//follow("Demo1");
-		/*
-		let p = new Promise((resolve,reject) => {
-			setTimeout(() => resolve({status : "resolved"}),7000);
-		});
-
-		p.then(res => 
-			{
-				console.log(res.status);
-				return new Promise((res,rej)=> {setTimeout(() => {res("resolved1")},3000)});
-		}).then(res => console.log(res));
-
-
-		let fun1 = () => "1";
-		let fun2 = () => {"1"};
-
-		console.log("fun1="+fun1());
-		console.log("fun2="+fun2());
-		*/
-		//this.loadFromServer(DEFAULT_PAGESIZE);
-
-		console.log("misc demo study END");
-
-		//const client = rest.wrap(mime);
-        //client({method: 'GET', path: '/api'}).then(response => {
-        //	let r = response;
-        //});
-
-
-        /*
-        client({method: 'GET', path: '/api/productCategories'}).then(response => {
-        	this.setState({
-        		productCategories : response.entity._embedded.productCategories,
-        		productCategoriesNameValue : this.toNameValueArray(response.entity._embedded.productCategories,["name"]),
-        	});
-        });
-        */
+		this.getParams(ENTITY_NAME).then(params => 
+			this.params = params
+		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
+			this.params.attributes = Object.keys(response.entity.properties);
+		}).then(() => this.gotoLastPage(this.params.entityLink));
 	}
 
 	getParams(entityName) {
 		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {
 			return {
 				entityLink : result.entity._links.self.href,
-				profileLink : result.entity._links.self.profile,
+				profileLink : result.entity._links.profile.href,
 				pageSize : result.entity.page.size,
-				totalPages : result.entity.page.totalPages,
 			}
 		});
 	}
 
 	getProfile(profileLink) {
-		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response =>
-			response
-		);
+		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response => response);
 	}
 
 	addNewRecord() {
@@ -148,31 +102,41 @@ class App extends React.Component {
 		}).then((r) => this.gotoLastPage());
 	}
 
-	gotoNextPage() {
+	gotoNextPage(link) {
 
 	}
 
-	gotoPrevPage() {
+	gotoPrevPage(link) {
 
 
 	}
 
-	gotoFirstPage(){
-		return client({method : 'GET', path : this.params.link, params : {page : 0}});
+	gotoFirstPage(link){
+		client({method : 'GET', path : link, params : {page : 0}}).then(response =>{
+			this.setState({
+				productCategories : response.entity._embedded.productCategories,
+				totalPages : response.entity.page.totalPages,
+			});
+		});
 	}
 
-	gotoLastPage() {
-		console.log("gotolastpage");
-		follow(client,root,['productCategories']).then(response => {
-			console.log("resp");
-		})
-
+	gotoLastPage(link) {
+		client({method : 'GET', path : link, params : {page : 0}})
+			.then(response => response.entity.page.totalPages)
+			.then(totalPages => client({method : 'GET', path : link, params : {page : totalPages-1}}))
+			.then(response => {
+				console.log("response="+response);
+				this.setState({
+					productCategories : response.entity._embedded.productCategories,
+					totalPages : response.entity.page.totalPages,
+			})
+		});
 	}
 
 	render() {
 		return (
 			<div>
-				<ListApplet attributes={this.state.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
+				<ListApplet attributes={this.params.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
 					save={this.sendToBackend}/>
 			</div>
 		)
