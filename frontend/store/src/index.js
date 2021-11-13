@@ -16,64 +16,8 @@ class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.params = {};
-		this.state = {
-			productCategories: [],
-			productCategoriesNameValue: [],
-			response : {},
-			pageSize : 0,
-			links : [],
-			page : [],
-			attributes : [],
-			totalPages : 0,
-		};
-		this.sendToBackend = this.sendToBackend.bind(this);
-		this.gotoNextPage = this.gotoNextPage.bind(this);
-	}
-	loadFromServer(pageSize) {
-		follow(client, root, [{rel: 'productCategories', params: {size: pageSize}}]
-		).then(productCategoryCollection => {
-			console.log("22="+productCategoryCollection.entity._links.profile.href);
-			return client({
-				method: 'GET',
-				path: productCategoryCollection.entity._links.profile.href,
-				headers: {'Accept': 'application/schema+json'}
-			}).then(schema => {
-				console.log("33");
-				this.schema = schema.entity;
-				return productCategoryCollection;
-			});
-		}).then(productCategoryCollection => {
-			console.log("44");
-			this.setState({
-				productCategories: productCategoryCollection.entity._embedded.productCategories,
-				attributes: Object.keys(this.schema.properties),
-				pageSize: pageSize,
-				links: productCategoryCollection.entity._links});
-		});
 	}
 
-	componentDidMount() {
-		this.getParams(ENTITY_NAME).then(params => 
-			this.params = params
-		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
-			this.params.attributes = Object.keys(response.entity.properties);
-		}).then(() => this.gotoFirstPage(this.params.entityLink));
-	}
-
-	getParams(entityName) {
-		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {
-			return {
-				entityLink : result.entity._links.self.href,
-				profileLink : result.entity._links.profile.href,
-				pageSize : result.entity.page.size,
-			}
-		});
-	}
-
-	getProfile(profileLink) {
-		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response => response);
-	}
 
 	addNewRecord() {
 		console.log("add record pressed");
@@ -86,28 +30,58 @@ class App extends React.Component {
 		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
 
 	}
-	cancelNewRecord() {
-		console.log("cancel record pressed");
-		let newProductCategoriesNameValue = this.state.productCategoriesNameValue.slice();
-		newProductCategoriesNameValue.pop();
-		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
+
+
+
+	render() {
+		return (
+			<div>
+				<ListApplet entityName='productCategories' />
+			</div>
+		)
 	}
-	sendToBackend(newRecord) {
-		console.log("send invoked "+newRecord.name);
-		return follow(client,root,['productCategories']).then(response => {
-			return client({
-				method : 'POST',
-				path : response.entity._links.self.href,
-				entity : newRecord,
-				headers : {'Content-Type' : 'application/json'},
-			});
-		}).then((r) => this.gotoLastPage());
+}
+
+
+class ListApplet extends React.Component {
+	constructor(props) {
+		super(props);
+		this.inpRefs = {};
+		this.params = {};
+		this.state = {
+			mode : 'RW',
+			links : {},
+			page : {},
+			records: [],
+			newRecord : {},
+		};
+		//this.gotoNextPage = this.gotoNextPage.bind(this);
+		this.saveNewRecord = this.saveNewRecord.bind(this);
+
+	}
+	componentDidMount() {
+		this.getParams(this.props.entityName).then(params => 
+			this.params = params
+		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
+			this.params.attributes = Object.keys(response.entity.properties);
+		}).then(() => this.gotoFirstPage(this.params.entityLink));
 	}
 
+	getParams(entityName) {
+		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {
+			return {
+				entityLink : result.entity._links.self.href,
+				profileLink : result.entity._links.profile.href,
+			}
+		});
+	}
+
+	getProfile(profileLink) {
+		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response => response);
+	}
 	gotoNextPage() {
-		console.log("next");
 		client({method : 'GET', path : this.state.links.next.href}).then(response => this.setState({
-			productCategories : response.entity._embedded.productCategories,
+			records : response.entity._embedded[this.props.entityName],
 			page : response.entity.page,
 			links : response.entity._links,
 		}));
@@ -115,7 +89,7 @@ class App extends React.Component {
 
 	gotoPrevPage() {
 		client({method : 'GET', path : this.state.links.prev.href}).then(response => this.setState({
-			productCategories : response.entity._embedded.productCategories,
+			records : response.entity._embedded[this.props.entityName],
 			page : response.entity.page,
 			links : response.entity._links,
 		}));
@@ -125,7 +99,7 @@ class App extends React.Component {
 	gotoFirstPage(link){
 		client({method : 'GET', path : link}).then(response =>
 			this.setState({
-				productCategories : response.entity._embedded.productCategories,
+				records : response.entity._embedded[this.props.entityName],
 				page : response.entity.page,
 				links : response.entity._links,
 			})
@@ -138,51 +112,66 @@ class App extends React.Component {
 			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
 			.then(response => {
 				this.setState({
-				productCategories : response.entity._embedded.productCategories,
-				page : response.entity.page,
-				links : response.entity._links,
+					records : response.entity._embedded[this.props.entityName],
+					page : response.entity.page,
+					links : response.entity._links,
 			})
 		});
 	}
-
-	render() {
-		return (
-			<div>
-				<ListApplet attributes={this.params.attributes} rows={this.state.productCategories} add={() => this.addNewRecord()} cancel={() => this.cancelNewRecord()} 
-					save={this.sendToBackend}
-					navNext={this.gotoNextPage}/>
-			</div>
-		)
+	saveNewRecord() {
+		console.log("send invoked ");
+		client({
+				method : 'POST',
+				path : this.params.entityLink,
+				entity : this.state.newRecord,
+				headers : {'Content-Type' : 'application/json'},
+		}).then(() => 
+			this.gotoLastPage(this.params.entityLink)
+		);
 	}
-}
+	toggleTopButtons() {
+		console.log("toggleHeader");
 
+		if (this.state.mode == 'RW') {
+			const newRec = this.params.attributes.reduce((obj,elem) => {
+				obj[elem]='';
+				return obj;
+			},{});
+			this.setState({
+				mode : 'ADD',
+				newRecord : newRec,
+			})
 
-class ListApplet extends React.Component {
-	constructor(props) {
-		super(props);
-		this.inpRefs = {};
-		console.log("child constructor");
-		this.state = {
-			mode : 'RW',
-			columns : props.columns,
-			rows : props.rows,
-		};
+		}
+		else {
+			this.setState({
+				mode : 'RW',
+			})	
+		}
 	}
-	componentDidMount() {
-		console.log("child component did mount");
+	childChange(e,attr,index) {
+		console.log("child change");
+		console.log("attr="+attr);
+		console.log("index="+index);
+		console.log("value="+e.target.value);
+		let evt = e; 
+	}
+	newRecordChange(e,attr) {
+		let rec = {...this.state.newRecord};
+		rec[attr] = e.target.value;
+		this.setState({newRecord : rec});
 	}
 	drawTopButtons() {
 		const navButtons = <div>
-			<button type='button' onClick={() => this.props.navFirst}>&lt;&lt;</button>
-			<button type='button' onClick={() => this.props.navPrev}>&lt;</button>
-			<button type='button' onClick={() => this.props.navNext}>></button>
-			<button type='button' onClick={() => this.props.navLast}>>></button>
+			<button disabled={!this.state.links.prev} type='button' onClick={() => this.gotoFirstPage(this.params.entityLink)}>&lt;&lt;</button>
+			<button disabled={!this.state.links.prev} type='button' onClick={() => this.gotoPrevPage()}>&lt;</button>
+			<button disabled={!this.state.links.next} type='button' onClick={() => this.gotoNextPage()}>></button>
+			<button disabled={!this.state.links.next} type='button' onClick={() => this.gotoLastPage(this.params.entityLink)}>>></button>
 		</div>
 		if (this.state.mode == 'RW') {
 			return( 
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Добавить</button>
-					<button type='button' onClick={() => this.save()}>Сохранить</button>
 					{navButtons}
 				</div>
 				)
@@ -191,41 +180,25 @@ class ListApplet extends React.Component {
 			return (
 				<div>
 					<button type='button' onClick={() => this.toggleTopButtons()}>Отменить</button>
-					<button type='button' onClick={() => this.save(this.props.save)}>Сохранить</button>
+					<button type='button' onClick={this.saveNewRecord}>Сохранить</button>
 					{navButtons}
 				</div>
 				)
 		}
 		return null;
 	}
-	save(saveHandler) {
-		let newRecord = {};
-		for (attr of this.props.attributes) {
-			//console.log(`this.inpRefs[${attr}].value=${this.inpRefs[attr].value}`);
-			newRecord[attr] = this.inpRefs[attr].value;
-		}
-		saveHandler(newRecord).then(() => this.setState({mode : 'RW'}));
-	}
-	toggleTopButtons() {
-		console.log("toggleHeader");
-		if (this.state.mode == 'RW') {
-			this.setState({mode : 'ADD'})
-			//this.props.add();
-		}
-		else {
-			this.setState({mode : 'RW'})	
-			this.props.cancel();
-		}
-	}
+
 	drawTableBody() {
-		if (this.props.rows.length > 0) {
+		if (this.state.records.length > 0) {
 			return (<table>
-				<tr>{this.props.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
-				{this.state.mode == 'RW' && this.props.rows.map((row, rowIndex) => <tr key={rowIndex}>{
-					this.props.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}/></td>)
+				<tr>{this.params.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
+				{this.state.mode == 'RW' && this.state.records.map((row, rowIndex) => <tr key={rowIndex}>{
+					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}
+						onChange={(e) => this.childChange(e,col,rowIndex)}/></td>)
 				}</tr>)}
-				{this.state.mode == 'ADD' && this.props.attributes.map((col,index) =>
-					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} value={col}/></td>
+				{this.state.mode == 'ADD' && this.params.attributes.map((col,index) =>
+					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} value={this.state.newRecord[col]}
+					onChange={(e) => this.newRecordChange(e,col)}/></td>
 				)}
 			</table>);
 		}
@@ -251,10 +224,13 @@ class ListApplet extends React.Component {
 class Control extends React.Component {
 	constructor(props) {
 		super(props);
+		this.params = {};
 		this.state = {
 			value : this.props.value,
 		};
 	}
+
+
 	render() {
 		let control;
 		if (this.props.type == 'button') {
@@ -264,8 +240,8 @@ class Control extends React.Component {
 			control = <div>{this.props.value}</div>	
 		}
 		else if (this.props.type == 'editText') {
-			control = <input type="text" ref={this.props.controlRef} size="10" value={this.state.value}
-				onChange={(e)=>this.setState({value : e.target.value})}>
+			control = <input type="text" ref={this.props.controlRef} size="10" value={this.props.value}
+				onChange={this.props.onChange}>
 			</input>	
 		}
 		return(control);
