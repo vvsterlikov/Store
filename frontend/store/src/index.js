@@ -18,21 +18,6 @@ class App extends React.Component {
 		super(props);
 	}
 
-
-	addNewRecord() {
-		console.log("add record pressed");
-		let newProductCategoriesNameValue = this.state.productCategoriesNameValue.slice();
-		let row = [];
-		for (let elem in newProductCategoriesNameValue[0]) {
-			row.push({name : elem.name, value : ""})
-		}
-		newProductCategoriesNameValue.push(row);
-		this.setState({productCategoriesNameValue : newProductCategoriesNameValue});
-
-	}
-
-
-
 	render() {
 		return (
 			<div>
@@ -106,7 +91,7 @@ class ListApplet extends React.Component {
 		);
 	}
 
-	gotoLastPage(link) {
+	gotoLastPage(link,newMode) {
 		client({method : 'GET', path : link, params : {page : 0}})
 			.then(response => response.entity.page.totalPages)
 			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
@@ -115,6 +100,7 @@ class ListApplet extends React.Component {
 					records : response.entity._embedded[this.props.entityName],
 					page : response.entity.page,
 					links : response.entity._links,
+					mode : newMode ? newMode : this.state.mode,
 			})
 		});
 	}
@@ -126,12 +112,11 @@ class ListApplet extends React.Component {
 				entity : this.state.newRecord,
 				headers : {'Content-Type' : 'application/json'},
 		}).then(() => 
-			this.gotoLastPage(this.params.entityLink)
+			this.gotoLastPage(this.params.entityLink,'RW')
 		);
 	}
-	toggleTopButtons() {
-		console.log("toggleHeader");
 
+	toggleTopButtons() {
 		if (this.state.mode == 'RW') {
 			const newRec = this.params.attributes.reduce((obj,elem) => {
 				obj[elem]='';
@@ -160,6 +145,9 @@ class ListApplet extends React.Component {
 		let rec = {...this.state.newRecord};
 		rec[attr] = e.target.value;
 		this.setState({newRecord : rec});
+	}
+	deleteRecord(e,index) {
+		console.log("delete index="+this.state.records[index]._links.self.href);
 	}
 	drawTopButtons() {
 		const navButtons = <div>
@@ -194,8 +182,9 @@ class ListApplet extends React.Component {
 				<tr>{this.params.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
 				{this.state.mode == 'RW' && this.state.records.map((row, rowIndex) => <tr key={rowIndex}>{
 					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}
-						onChange={(e) => this.childChange(e,col,rowIndex)}/></td>)
-				}</tr>)}
+						onChange={(e) => this.recordChange(e,col,rowIndex)}/></td>)
+				}<td><Control type='button' name='X' onClick={(e) => this.deleteRecord(e,rowIndex)}/></td>
+				</tr>)}
 				{this.state.mode == 'ADD' && this.params.attributes.map((col,index) =>
 					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} value={this.state.newRecord[col]}
 					onChange={(e) => this.newRecordChange(e,col)}/></td>
@@ -234,7 +223,7 @@ class Control extends React.Component {
 	render() {
 		let control;
 		if (this.props.type == 'button') {
-			control = <button type='button'>{this.props.name}</button>
+			control = <button type='button' onClick={this.props.onClick}>{this.props.name}</button>
 		}
 		else if (this.props.type == 'readOnlyText') {
 			control = <div>{this.props.value}</div>	
