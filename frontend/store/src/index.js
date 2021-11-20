@@ -146,8 +146,12 @@ class ListApplet extends React.Component {
 		rec[attr] = e.target.value;
 		this.setState({newRecord : rec});
 	}
-	deleteRecord(e,index) {
+	deleteRecord(index) {
 		console.log("delete index="+this.state.records[index]._links.self.href);
+		client({
+			method : 'DELETE',
+			path : this.state.records[index]._links.self.href
+		}).then(() => this.gotoFirstPage(this.params.entityLink));
 	}
 	drawTopButtons() {
 		const navButtons = <div>
@@ -183,7 +187,7 @@ class ListApplet extends React.Component {
 				{this.state.mode == 'RW' && this.state.records.map((row, rowIndex) => <tr key={rowIndex}>{
 					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}
 						onChange={(e) => this.recordChange(e,col,rowIndex)}/></td>)
-				}<td><Control type='button' name='X' onClick={(e) => this.deleteRecord(e,rowIndex)}/></td>
+				}<td><Control type='button' name='X' onClick={() => this.deleteRecord(rowIndex)}/></td>
 				</tr>)}
 				{this.state.mode == 'ADD' && this.params.attributes.map((col,index) =>
 					<td key={index}><Control type='editText' controlRef={el => this.inpRefs[col] = el} value={this.state.newRecord[col]}
