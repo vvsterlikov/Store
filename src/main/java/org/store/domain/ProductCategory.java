@@ -1,9 +1,8 @@
 package org.store.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 
 @Entity
 public class ProductCategory {
@@ -12,12 +11,14 @@ public class ProductCategory {
     private Long id;
     private String name;
     private String code;
+    private @Version @JsonIgnore Long version;
 
     protected ProductCategory() {}
 
     public ProductCategory(String name, String code) {
         this.name = name;
         this.code = code;
+        Objects.
     }
     @Override
     public String toString() {

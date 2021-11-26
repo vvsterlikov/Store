@@ -39,6 +39,7 @@ class ListApplet extends React.Component {
 			page : {},
 			records: [],
 			newRecord : {},
+			pageSizeCustom : 0,
 		};
 		//this.gotoNextPage = this.gotoNextPage.bind(this);
 		this.saveNewRecord = this.saveNewRecord.bind(this);
@@ -81,11 +82,16 @@ class ListApplet extends React.Component {
 
 	}
 
-	gotoFirstPage(link){
-		client({method : 'GET', path : link}).then(response =>
+	gotoFirstPage(link,size){
+		let pageSize = '';
+		if (size) {
+			pageSize = '?size='+size;
+		}
+		client({method : 'GET', path : link+pageSize}).then(response =>
 			this.setState({
 				records : response.entity._embedded[this.props.entityName],
 				page : response.entity.page,
+				pageSizeCustom : response.entity.page.size,
 				links : response.entity._links,
 			})
 		);
@@ -199,12 +205,37 @@ class ListApplet extends React.Component {
 			return(<div>Нет записей</div>)
 		}
 	}
+	drawPageSize() {
+		return(
+			<div>
+				Записей на странице: <Control type='editText' value={this.state.pageSizeCustom} onChange={e => this.changePageSize(e)}/>
+				<button type='button' onClick={e=>this.savePageSize()}>Применить</button>
+			</div>
+		)
+	}
+	changePageSize(e) {
+		this.setState({
+			pageSizeCustom : e.target.value,
+		});
+		
+	}
+	savePageSize() {
+		const size = this.state.pageSizeCustom;
+		if (/^[^1-9]|[^0-9]/.test(size)) {
+			alert("Некорректный размер страницы");
+			return;
+		}
+		this.gotoFirstPage(this.params.entityLink,size);
+	}
 	render() {
 		console.log("render child="+this.state.mode);
 		return(
 			<div>
 				<div>
 					{this.drawTopButtons()}
+				</div>
+					{this.drawPageSize()}
+				<div>
 				</div>
 				<div>
 					{this.drawTableBody()}
