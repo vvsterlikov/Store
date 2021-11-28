@@ -46,11 +46,21 @@ class ListApplet extends React.Component {
 
 	}
 	componentDidMount() {
+		/*
 		this.getParams(this.props.entityName).then(params => 
 			this.params = params
 		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
+		*/
+		this.getParams(this.props.entityName).then(params => 
+			this.params = params
+		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
+			this.params.attributes = Object.keys(response.entity.properties);
+		}).then(() => this.gotoFirstPage(this.params.entityLink));
+	
+	
+
 	}
 
 	getParams(entityName) {
@@ -66,19 +76,51 @@ class ListApplet extends React.Component {
 		return client({method : 'GET', path : profileLink, headers : {'Accept' : 'application/schema+json'}}).then(response => response);
 	}
 	gotoNextPage() {
+		/*
 		client({method : 'GET', path : this.state.links.next.href}).then(response => this.setState({
 			records : response.entity._embedded[this.props.entityName],
 			page : response.entity.page,
 			links : response.entity._links,
 		}));
+		*/
+		client({method : 'GET', path : this.state.links.next.href}).then(response => {
+			this.page = response.entity.page;
+			this.links = response.entity._links;
+			return Promise.all(response.entity._embedded[this.props.entityName].map(elem => 
+				client({method : 'GET', path : elem._links.self.href})
+			))
+		}).then(detailedRecords => {
+			this.setState({
+				records : detailedRecords,
+				page : this.page,
+				pageSizeCustom : this.pageSizeCustom,
+				links : this.links,
+			})
+		});
 	}
 
 	gotoPrevPage() {
+		/*
 		client({method : 'GET', path : this.state.links.prev.href}).then(response => this.setState({
 			records : response.entity._embedded[this.props.entityName],
 			page : response.entity.page,
 			links : response.entity._links,
 		}));
+		*/
+		client({method : 'GET', path : this.state.links.prev.href}).then(response => {
+			this.page = response.entity.page;
+			this.links = response.entity._links;
+			return Promise.all(response.entity._embedded[this.props.entityName].map(elem => 
+				client({method : 'GET', path : elem._links.self.href})
+			))
+		}).then(detailedRecords => {
+			this.setState({
+				records : detailedRecords,
+				page : this.page,
+				pageSizeCustom : this.pageSizeCustom,
+				links : this.links,
+			})
+		});		
 
 	}
 
@@ -87,6 +129,7 @@ class ListApplet extends React.Component {
 		if (size) {
 			pageSize = '?size='+size;
 		}
+		/*
 		client({method : 'GET', path : link+pageSize}).then(response =>
 			this.setState({
 				records : response.entity._embedded[this.props.entityName],
@@ -95,9 +138,28 @@ class ListApplet extends React.Component {
 				links : response.entity._links,
 			})
 		);
+		*/
+		client({method : 'GET', path : link+pageSize}).then(response => {
+				this.page = response.entity.page;
+				this.pageSizeCustom = response.entity.page.size;
+				this.links = response.entity._links;
+				return Promise.all(response.entity._embedded[this.props.entityName].map(record => 
+					client({method : 'GET',	path : record._links.self.href,})
+			))}
+		).then(detailedRecords => {
+			this.setState({
+				records : detailedRecords,
+				page : this.page,
+				pageSizeCustom : this.pageSizeCustom,
+				links : this.links,
+			})
+
+		});
+
 	}
 
 	gotoLastPage(link,newMode) {
+		/*
 		client({method : 'GET', path : link, params : {page : 0}})
 			.then(response => response.entity.page.totalPages)
 			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
@@ -109,6 +171,26 @@ class ListApplet extends React.Component {
 					mode : newMode ? newMode : this.state.mode,
 			})
 		});
+		*/
+		client({method : 'GET', path : link, params : {page : 0}})
+			.then(response => response.entity.page.totalPages)
+			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
+			.then(response => {
+				this.page = response.entity.page;
+				this.links = response.entity._links;  
+				return Promise.all(response.entity._embedded[this.props.entityName].map(elem => 
+					client({method : 'GET', path : elem._links.self.href})
+				))
+
+		}).then(detailRecords => {
+			this.setState({
+					records : detailRecords,
+					page : this.page,
+					links : this.links,
+					mode : newMode ? newMode : this.state.mode,	
+			})
+		});
+
 	}
 	saveNewRecord() {
 		console.log("send invoked ");
@@ -153,15 +235,15 @@ class ListApplet extends React.Component {
 		this.setState({newRecord : rec});
 	}
 	deleteRecord(index) {
-		console.log("delete index="+this.state.records[index]._links.self.href);
+		//console.log("delete index="+this.state.records[index].url);
 		client({
 			method : 'DELETE',
-			path : this.state.records[index]._links.self.href
-		}).then(() => this.gotoFirstPage(this.params.entityLink));
+			path : this.state.records[index].url,
+		}).then(() => this.gotoFirstPage(this.params.entityLink,this.state.page.size));
 	}
 	drawTopButtons() {
 		const navButtons = <div>
-			<button disabled={!this.state.links.prev} type='button' onClick={() => this.gotoFirstPage(this.params.entityLink)}>&lt;&lt;</button>
+			<button disabled={!this.state.links.prev} type='button' onClick={() => this.gotoFirstPage(this.params.entityLink,this.state.page.size)}>&lt;&lt;</button>
 			<button disabled={!this.state.links.prev} type='button' onClick={() => this.gotoPrevPage()}>&lt;</button>
 			<button disabled={!this.state.links.next} type='button' onClick={() => this.gotoNextPage()}>></button>
 			<button disabled={!this.state.links.next} type='button' onClick={() => this.gotoLastPage(this.params.entityLink)}>>></button>
@@ -191,7 +273,7 @@ class ListApplet extends React.Component {
 			return (<table>
 				<tr>{this.params.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
 				{this.state.mode == 'RW' && this.state.records.map((row, rowIndex) => <tr key={rowIndex}>{
-					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row[col]}
+					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row.entity[col]}
 						onChange={(e) => this.recordChange(e,col,rowIndex)}/></td>)
 				}<td><Control type='button' name='X' onClick={() => this.deleteRecord(rowIndex)}/></td>
 				</tr>)}
