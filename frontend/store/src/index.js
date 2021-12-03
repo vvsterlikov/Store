@@ -40,6 +40,7 @@ class ListApplet extends React.Component {
 			records: [],
 			newRecord : {},
 			pageSizeCustom : 0,
+			needSendChanges : false,
 		};
 		//this.gotoNextPage = this.gotoNextPage.bind(this);
 		this.saveNewRecord = this.saveNewRecord.bind(this);
@@ -222,12 +223,30 @@ class ListApplet extends React.Component {
 			})	
 		}
 	}
-	childChange(e,attr,index) {
+	modifyRecord(e,attr,index) {
 		console.log("child change");
 		console.log("attr="+attr);
 		console.log("index="+index);
 		console.log("value="+e.target.value);
-		let evt = e; 
+		const newVal = e.target.value.trim();
+		const oldVal = this.state.records[index].entity[attr];
+		console.log("old val="+oldVal);
+		console.log("new val="+newVal);
+		let newRecords = [...this.state.records];
+		newRecords[index].entity[attr] = newVal;
+		this.setState({
+			records : newRecords,
+			prevRecords ; this.state.records,
+		});
+		//let evt = e; 
+	}
+	saveModifiedRecord(e,attr,index) {
+		console.log("blur");
+		console.log("attr="+attr);
+		console.log("index="+index);
+		console.log("value="+e.target.value);
+		let evt = e;
+		this.state	
 	}
 	newRecordChange(e,attr) {
 		let rec = {...this.state.newRecord};
@@ -274,7 +293,8 @@ class ListApplet extends React.Component {
 				<tr>{this.params.attributes.map((elem,index) => <td key={index}>{elem}</td>)}</tr>
 				{this.state.mode == 'RW' && this.state.records.map((row, rowIndex) => <tr key={rowIndex}>{
 					this.params.attributes.map((col) => <td key={col+rowIndex}><Control type="editText" value={row.entity[col]}
-						onChange={(e) => this.recordChange(e,col,rowIndex)}/></td>)
+						onChange={(e) => this.modifyRecord(e,col,rowIndex)}
+						onBlur={e => this.saveModifiedRecord(e, col, rowIndex)}/></td>)
 				}<td><Control type='button' name='X' onClick={() => this.deleteRecord(rowIndex)}/></td>
 				</tr>)}
 				{this.state.mode == 'ADD' && this.params.attributes.map((col,index) =>
@@ -347,7 +367,8 @@ class Control extends React.Component {
 		}
 		else if (this.props.type == 'editText') {
 			control = <input type="text" ref={this.props.controlRef} size="10" value={this.props.value}
-				onChange={this.props.onChange}>
+				onChange={this.props.onChange}
+				onBlur={this.props.onBlur}>
 			</input>	
 		}
 		return(control);
