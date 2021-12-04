@@ -40,7 +40,8 @@ class ListApplet extends React.Component {
 			records: [],
 			newRecord : {},
 			pageSizeCustom : 0,
-			needSendChanges : false,
+			prevVal : '',
+			hasUncommitedChanges : false,
 		};
 		//this.gotoNextPage = this.gotoNextPage.bind(this);
 		this.saveNewRecord = this.saveNewRecord.bind(this);
@@ -160,19 +161,6 @@ class ListApplet extends React.Component {
 	}
 
 	gotoLastPage(link,newMode) {
-		/*
-		client({method : 'GET', path : link, params : {page : 0}})
-			.then(response => response.entity.page.totalPages)
-			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
-			.then(response => {
-				this.setState({
-					records : response.entity._embedded[this.props.entityName],
-					page : response.entity.page,
-					links : response.entity._links,
-					mode : newMode ? newMode : this.state.mode,
-			})
-		});
-		*/
 		client({method : 'GET', path : link, params : {page : 0}})
 			.then(response => response.entity.page.totalPages)
 			.then(totalPages => client({method : 'GET', path : link+'?page='+parseInt(totalPages-1), params : {page : 0}}))
@@ -193,8 +181,26 @@ class ListApplet extends React.Component {
 		});
 
 	}
+	refreshCurrentPage() {
+		client({
+			path : this.state.links.self.href,
+			method : 'GET'
+		}).then(response => {
+			this.page = response.entity.page;
+			this.links = response.entity._links;  
+			return Promise.all(response.entity._embedded[this.props.entityName].map(elem =>
+				client({method : 'GET', path : elem._links.self.href})
+			))
+		}).then(detailRecords => {
+			this.setState({
+				records : detailRecords,
+				page : this.page,
+				links : this.links,
+				hasUncommitedChanges : false,
+			})
+		})
+	}
 	saveNewRecord() {
-		console.log("send invoked ");
 		client({
 				method : 'POST',
 				path : this.params.entityLink,
@@ -215,7 +221,6 @@ class ListApplet extends React.Component {
 				mode : 'ADD',
 				newRecord : newRec,
 			})
-
 		}
 		else {
 			this.setState({
@@ -224,29 +229,45 @@ class ListApplet extends React.Component {
 		}
 	}
 	modifyRecord(e,attr,index) {
-		console.log("child change");
-		console.log("attr="+attr);
-		console.log("index="+index);
-		console.log("value="+e.target.value);
 		const newVal = e.target.value.trim();
 		const oldVal = this.state.records[index].entity[attr];
-		console.log("old val="+oldVal);
-		console.log("new val="+newVal);
 		let newRecords = [...this.state.records];
-		newRecords[index].entity[attr] = newVal;
-		this.setState({
-			records : newRecords,
-			prevRecords ; this.state.records,
-		});
-		//let evt = e; 
+		newRecords[index].entity[attr] = newVal;		
+		if (!this.state.hasUncommitedChanges) {
+			this.setState({
+				hasUncommitedChanges : true,
+				prevVal : oldVal,
+				records : newRecords,
+			});
+		}
+		else {
+			this.setState({
+				records : newRecords,
+			});
+		}
 	}
 	saveModifiedRecord(e,attr,index) {
-		console.log("blur");
-		console.log("attr="+attr);
-		console.log("index="+index);
-		console.log("value="+e.target.value);
 		let evt = e;
-		this.state	
+		if (this.state.hasUncommitedChanges && this.state.prevVal != this.state.records[index].entity[attr]) {
+			client({
+				method : 'PUT',
+				path : this.state.records[index].entity._links.self.href,
+				entity : this.state.records[index].entity,
+				headers : {
+					'Content-Type' : 'application/json',
+					'If-Match' : this.state.records[index].headers.Etag,
+				},
+			}).then(response => {
+				this.refreshCurrentPage();
+			}).catch(response => {
+				if (response.status.code === 412) {
+					alert("Запись была изменена другим пользователем, обновите страницу и повторите попытку!");
+				}
+				this.setState({
+					hasUncommitedChanges : false,
+				});
+			})
+		}
 	}
 	newRecordChange(e,attr) {
 		let rec = {...this.state.newRecord};
@@ -254,7 +275,6 @@ class ListApplet extends React.Component {
 		this.setState({newRecord : rec});
 	}
 	deleteRecord(index) {
-		//console.log("delete index="+this.state.records[index].url);
 		client({
 			method : 'DELETE',
 			path : this.state.records[index].url,
@@ -330,7 +350,6 @@ class ListApplet extends React.Component {
 		this.gotoFirstPage(this.params.entityLink,size);
 	}
 	render() {
-		console.log("render child="+this.state.mode);
 		return(
 			<div>
 				<div>
