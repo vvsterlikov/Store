@@ -5,6 +5,7 @@ const rest = require('rest');
 const mime = require('rest/interceptor/mime');
 const follow = require('./follow.js');
 const client = require('./client.js');
+const webSocketClient = require('./api/websocket-listener.js');
 
 let renderCount = 0;
 const root = '/api';
@@ -48,19 +49,16 @@ class ListApplet extends React.Component {
 
 	}
 	componentDidMount() {
-		/*
 		this.getParams(this.props.entityName).then(params => 
 			this.params = params
 		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
-		*/
-		this.getParams(this.props.entityName).then(params => 
-			this.params = params
-		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
-			this.params.attributes = Object.keys(response.entity.properties);
-		}).then(() => this.gotoFirstPage(this.params.entityLink));
-	
+		webSocketClient([
+			{route : '/topic/newProductCategory', callback : this.gotoLastPage},
+			{route : '/topic/updateProductCategory', callback : this.refreshCurrentPage},
+			{route : '/topic/deleteProductCategory', callback : this.refreshCurrentPage}
+		]);	
 	
 
 	}
