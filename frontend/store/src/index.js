@@ -55,12 +55,15 @@ class ListApplet extends React.Component {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
 		webSocketClient([
-			{route : '/topic/newProductCategory', callback : this.gotoLastPage},
-			{route : '/topic/updateProductCategory', callback : this.refreshCurrentPage},
-			{route : '/topic/deleteProductCategory', callback : this.refreshCurrentPage}
+			{route : '/topic/newProductCategory', callback : this.webSocketCallback},
+			{route : '/topic/updateProductCategory', callback : this.webSocketCallback},
+			{route : '/topic/deleteProductCategory', callback : this.webSocketCallback}
 		]);	
 	
 
+	}
+	webSocketCallback(message) {
+		console.log("кто-то модифицирует запись, обновите страницу");
 	}
 
 	getParams(entityName) {

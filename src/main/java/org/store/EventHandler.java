@@ -24,15 +24,15 @@ public class EventHandler {
     }
     @HandleAfterCreate
     public void newProductCategory(ProductCategory productCategory) {
-        this.websocket.convertAndSend(MESSAGE_PREFIX + "/newProductCateпory",getPath(productCategory));
+        this.websocket.convertAndSend(MESSAGE_PREFIX + "/newProductCategory",getPath(productCategory));
     }
     @HandleAfterDelete
     public void deleteProductCategory(ProductCategory productCategory) {
-        this.websocket.convertAndSend(MESSAGE_PREFIX + "/deleteProductCateпory",getPath(productCategory));
+        this.websocket.convertAndSend(MESSAGE_PREFIX + "/deleteProductCategory",getPath(productCategory));
     }
     @HandleAfterSave
     public void updateProductCategory(ProductCategory productCategory) {
-        this.websocket.convertAndSend(MESSAGE_PREFIX + "/updateProductCateпory",getPath(productCategory));
+        this.websocket.convertAndSend(MESSAGE_PREFIX + "/updateProductCategory",getPath(productCategory));
     }
 
     private String getPath(ProductCategory productCategory) {
