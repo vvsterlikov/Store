@@ -63,6 +63,7 @@ class ListApplet extends React.Component {
 
 	}
 	webSocketCallback(message) {
+		let m = message;
 		console.log("кто-то модифицирует запись, обновите страницу");
 	}
 
