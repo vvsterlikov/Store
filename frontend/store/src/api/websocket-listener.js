@@ -1,10 +1,15 @@
 'use strict';
 const SockJS = require('sockjs-client');
 const Stomp = require('stompjs');
-module.exports = registrations => {
+module.exports = (clientId, registrations) => {
 	const socket = SockJS('/classifier');
+	const headers = {
+		login : clientId,
+		passcode : clientId,
+		'clientId' : clientId,
+	};
 	const stompClient = Stomp.over(socket);
-	stompClient.connect({}, function(frame) {
-		registrations.forEach(registration => stompClient.subscribe(registration.route,registration.callback));
+	stompClient.connect(headers, frame => {
+		registrations.forEach(registration => stompClient.subscribe(registration.route,registration.callback, {id : "const"}));
 	});
 }

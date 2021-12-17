@@ -46,6 +46,7 @@ class ListApplet extends React.Component {
 		};
 		//this.gotoNextPage = this.gotoNextPage.bind(this);
 		this.saveNewRecord = this.saveNewRecord.bind(this);
+		this.webSocketCallback = this.webSocketCallback.bind(this);
 
 	}
 	componentDidMount() {
@@ -54,7 +55,8 @@ class ListApplet extends React.Component {
 		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
-		webSocketClient([
+		this.webSocketSessId = Math.floor(Math.random()*999999).toString();
+		webSocketClient(this.webSocketSessId,[
 			{route : '/topic/newProductCategory', callback : this.webSocketCallback},
 			{route : '/topic/updateProductCategory', callback : this.webSocketCallback},
 			{route : '/topic/deleteProductCategory', callback : this.webSocketCallback}
@@ -63,8 +65,12 @@ class ListApplet extends React.Component {
 
 	}
 	webSocketCallback(message) {
-		let m = message;
-		console.log("кто-то модифицирует запись, обновите страницу");
+		let sid = message.headers.subscription;
+		console.log("msg sid = "+sid);
+		console.log("own sid ="+this.webSocketSessId);
+		if (sid != this.webSocketSessId) {
+			alert("Запись модифицирована другим пользователем, обновите страницу");
+		}
 	}
 
 	getParams(entityName) {
