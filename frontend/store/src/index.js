@@ -56,12 +56,18 @@ class ListApplet extends React.Component {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
 		this.webSocketSessId = Math.floor(Math.random()*999999).toString();
+		
+		/*
 		webSocketClient(this.webSocketSessId,[
 			{route : '/topic/newProductCategory', callback : this.webSocketCallback},
 			{route : '/topic/updateProductCategory', callback : this.webSocketCallback},
 			{route : '/topic/deleteProductCategory', callback : this.webSocketCallback}
 		]);	
-	
+		*/
+		//let l = webSocketClient;
+		//let subscription = webSocketClient.subscribe('/topic/updateProductCategory',this.webSocketCallback);
+		webSocketClient(() => console.log("subscription handler invoked"));
+		//console.log("subscription = "+ subscription);
 
 	}
 	webSocketCallback(message) {
