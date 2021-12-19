@@ -15,16 +15,25 @@ module.exports = (clientId, registrations) => {
 	});
 }
 */
+/*
 'use strict';
 const SockJS = require('sockjs-client');
 const StompJs = require('@stomp/stompjs');
 const client = new StompJs.Client({
 	webSocketFactory : () => {
-		return SockJS('/classifier');
+		const sock = SockJS('/classifier');
+		sock.onopen = () => {
+			console.log("sock open");
+		};
+		sock.onmessage = (msg) => {
+			console.log("msg="+msg);
+		};
+		return sock;
 	},
 	connectHeaders : {
 		login : 'user',
 		passcode : 'password',
+		sessionId : 'generatedsessid',
 	},
 	debug : function(str) {
 		console.log(str);
@@ -43,8 +52,40 @@ client.onStompError = function(frame) {
 module.exports = subscriptionHandler => {
 	client.onConnect = function(frame) {
 		let ws = client.webSocket;
+		let f = frame;
 		console.log("connected");
-		subscriptionHandler();
+		client.subscribe('/topic/updateProductCategory',subscriptionHandler)
 	};
 	client.activate();
 };
+*/
+
+RxStomp = require('@stomp/rx-stomp');
+const SockJS = require('sockjs-client');
+
+const rxStomp = new RxStomp.RxStomp();
+
+rxStomp.configure({
+	webSocketFactory : () => {
+		const sock = SockJS('/classifier');
+		return sock;
+	},
+	connectHeaders : {
+		login : 'guest',
+		passcode : 'guest',
+	},
+	heartbeatIncoming: 0,
+	heartbeatOutgoing: 20000,
+	reconnectDelay: 200,
+	debug: msg => {
+		console.log("DEBUG: "+msg);
+		let h = rxStomp.serverHeaders$;
+	}
+});
+
+module.exports = subscriptionHandler => {
+	let subscription = rxStomp.watch('/topic/updateProductCategory').subscribe(payload => {
+		subscriptionHandler(payload);
+	});
+	rxStomp.activate();
+}

@@ -1,6 +1,7 @@
 package org.store;
 
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -14,7 +15,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     static final String MESSAGE_PREFIX = "/topic";
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/classifier").addInterceptors(new HttpHandshakeInterceptor()).withSockJS();
+        registry.addEndpoint("/classifier").addInterceptors(new HttpHandshakeInterceptor()).addInterceptors(new CustomOutboundChannelInterceptor()).withSockJS();
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {

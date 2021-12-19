@@ -66,7 +66,11 @@ class ListApplet extends React.Component {
 		*/
 		//let l = webSocketClient;
 		//let subscription = webSocketClient.subscribe('/topic/updateProductCategory',this.webSocketCallback);
-		webSocketClient(() => console.log("subscription handler invoked"));
+		webSocketClient((message) => {
+			console.log("subscription handler invoked")
+			let m = message.user;
+			console.log("user="+m);
+		});
 		//console.log("subscription = "+ subscription);
 
 	}
