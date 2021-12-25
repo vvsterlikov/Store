@@ -17,12 +17,12 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
             HttpSession session = servletRequest.getServletRequest().getSession();
             attributes.put("sessionId", session.getId());
             System.out.println("sess="+session.getId());
+
         }
         return true;
     }
 
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception ex) {
-
     }
 
 

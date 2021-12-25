@@ -5,7 +5,9 @@ const rest = require('rest');
 const mime = require('rest/interceptor/mime');
 const follow = require('./follow.js');
 const client = require('./client.js');
-const webSocketClient = require('./api/websocket-listener.js');
+//const webSocketClient = require('./api/websocket-listener.js');
+
+import LeftMenu from './leftmenu.js';
 
 let renderCount = 0;
 const root = '/api';
@@ -22,7 +24,12 @@ class App extends React.Component {
 	render() {
 		return (
 			<div>
-				<ListApplet entityName='productCategories' />
+				<div>	
+					<LeftMenu />
+				</div>
+				<div>
+					<ListApplet entityName='productCategories' />
+				</div>
 			</div>
 		)
 	}
@@ -46,7 +53,7 @@ class ListApplet extends React.Component {
 		};
 		//this.gotoNextPage = this.gotoNextPage.bind(this);
 		this.saveNewRecord = this.saveNewRecord.bind(this);
-		this.webSocketCallback = this.webSocketCallback.bind(this);
+		//this.webSocketCallback = this.webSocketCallback.bind(this);
 
 	}
 	componentDidMount() {
@@ -55,7 +62,7 @@ class ListApplet extends React.Component {
 		).then(() => this.getProfile(this.params.profileLink)).then((response) => {
 			this.params.attributes = Object.keys(response.entity.properties);
 		}).then(() => this.gotoFirstPage(this.params.entityLink));
-		this.webSocketSessId = Math.floor(Math.random()*999999).toString();
+		//this.webSocketSessId = Math.floor(Math.random()*999999).toString();
 		
 		/*
 		webSocketClient(this.webSocketSessId,[
@@ -64,6 +71,7 @@ class ListApplet extends React.Component {
 			{route : '/topic/deleteProductCategory', callback : this.webSocketCallback}
 		]);	
 		*/
+		/*
 		//let l = webSocketClient;
 		//let subscription = webSocketClient.subscribe('/topic/updateProductCategory',this.webSocketCallback);
 		webSocketClient((message) => {
@@ -72,8 +80,11 @@ class ListApplet extends React.Component {
 			console.log("user="+m);
 		});
 		//console.log("subscription = "+ subscription);
+		*/
+		//webSocketClient(webSocketCallback);
 
 	}
+	/*
 	webSocketCallback(message) {
 		let sid = message.headers.subscription;
 		console.log("msg sid = "+sid);
@@ -82,6 +93,7 @@ class ListApplet extends React.Component {
 			alert("Запись модифицирована другим пользователем, обновите страницу");
 		}
 	}
+	*/
 
 	getParams(entityName) {
 		return client({method : 'GET', path: '/api/'+entityName}).then((result) => {

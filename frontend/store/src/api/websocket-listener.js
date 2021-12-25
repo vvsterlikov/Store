@@ -11,11 +11,12 @@ module.exports = (clientId, registrations) => {
 	};
 	const stompClient = Stomp.over(socket);
 	stompClient.connect(headers, frame => {
+		let f = frame;
 		registrations.forEach(registration => stompClient.subscribe(registration.route,registration.callback, {id : "const"}));
 	});
 }
 */
-/*
+
 'use strict';
 const SockJS = require('sockjs-client');
 const StompJs = require('@stomp/stompjs');
@@ -58,8 +59,8 @@ module.exports = subscriptionHandler => {
 	};
 	client.activate();
 };
-*/
 
+/*
 RxStomp = require('@stomp/rx-stomp');
 const SockJS = require('sockjs-client');
 
@@ -89,3 +90,4 @@ module.exports = subscriptionHandler => {
 	});
 	rxStomp.activate();
 }
+*/
