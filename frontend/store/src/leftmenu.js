@@ -1,16 +1,12 @@
 import React from 'react';
 
-const menuItems = ['Категории', 'Связь категорий'];
 
 export default class LeftMenu extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			selectedItem : 0,
-		};
 	}
 	render() {
-		return	<ul>{menuItems.map(item => <li><button type='button'>{item}</button></li>)}</ul>;
+		return	<ul>{this.props.menuItems.map((item, index) => <li><button type='button' onClick={() => this.props.clickHandler(index)}>{item}</button></li>)}</ul>;
 	}
 }
 
