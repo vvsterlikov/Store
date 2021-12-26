@@ -3,37 +3,54 @@ const ReactDOM = require('react-dom');
 
 const rest = require('rest');
 const mime = require('rest/interceptor/mime');
-const follow = require('./follow.js');
+//const follow = require('./follow.js');
 const client = require('./client.js');
 //const webSocketClient = require('./api/websocket-listener.js');
 
 import LeftMenu from './leftmenu.js';
+import ChildParentRelationApplet from './childparentrelationapplet.js'
+import './styles.css';
 
 let renderCount = 0;
 const root = '/api';
 const ENTITY_NAME = 'productCategories';
 const DEFAULT_PAGESIZE = 3;
+const menuItems = ['Категории', 'Связь категорий'];
 
 
 class App extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.state = {
+			selectedMenuItem : 0,
+		}
+		this.menuClickHandler = this.menuClickHandler.bind(this);
 	}
 
 	render() {
 		return (
-			<div>
-				<div>	
-					<LeftMenu />
+			<div className="container">
+				<div className="left-menu">	
+					<LeftMenu menuItems={menuItems} clickHandler={this.menuClickHandler}/>
 				</div>
-				<div>
-					<ListApplet entityName='productCategories' />
+				<div className="content">
+					{this.state.selectedMenuItem=='0'&&<ListApplet entityName='productCategories' />}
+					{this.state.selectedMenuItem=="1"&&<ChildParentRelationApplet />}
 				</div>
 			</div>
 		)
 	}
+	menuClickHandler(itemNum) {
+		if (itemNum != this.state.selectedMenuItem) {
+			this.setState({
+				selectedMenuItem : itemNum,
+			});
+		}	
+	}	
 }
+
+
 
 
 class ListApplet extends React.Component {
