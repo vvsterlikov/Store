@@ -15,6 +15,7 @@ public class Store {
     public static void main(String[] args) {
         SpringApplication.run(Store.class, args);
     }
+
     @Bean
     public CommandLineRunner demo(ProductCategoryRepository productCategoryRepository) {
         return (args) -> {
@@ -28,11 +29,13 @@ public class Store {
             productCategoryRepository.save(new ProductCategory("Видеокарты", "Videocards"));
             productCategoryRepository.save(new ProductCategory("Сканеры", "Scaners"));
             productCategoryRepository.save(new ProductCategory("Жесткие диски", "Harddisks"));
-
+            /*
             log.info("Выбираем категории из БД");
             for (ProductCategory pc : productCategoryRepository.findAll()) {
                 log.info(pc.toString());
             }
+
+             */
         };
     }
 }
