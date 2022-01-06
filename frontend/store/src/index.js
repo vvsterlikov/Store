@@ -9,13 +9,14 @@ const client = require('./client.js');
 
 import LeftMenu from './leftmenu.js';
 import ChildParentRelationApplet from './childparentrelationapplet.js'
+import ProductCategoriesAdministration from './productcategoriesadministration.js'
 import './styles.css';
 
 let renderCount = 0;
 const root = '/api';
 const ENTITY_NAME = 'productCategories';
 const DEFAULT_PAGESIZE = 3;
-const menuItems = ['Категории', 'Связь категорий'];
+const menuItems = ['Справочник категорий товаров', 'Связь категорий'];
 
 
 class App extends React.Component {
@@ -35,7 +36,8 @@ class App extends React.Component {
 					<LeftMenu menuItems={menuItems} clickHandler={this.menuClickHandler}/>
 				</div>
 				<div className="content">
-					{this.state.selectedMenuItem=='0'&&<ListApplet entityName='productCategories' />}
+					{/*this.state.selectedMenuItem=='0'&&<ListApplet entityName='productCategories' />*/}
+					{this.state.selectedMenuItem=='0'&&<ProductCategoriesAdministration />}
 					{this.state.selectedMenuItem=="1"&&<ChildParentRelationApplet />}
 				</div>
 			</div>
@@ -353,7 +355,7 @@ class ListApplet extends React.Component {
 		}
 		return null;
 	}
-
+	/*
 	drawTableBody() {
 		if (this.state.records.length > 0) {
 			return (<table>
@@ -374,6 +376,26 @@ class ListApplet extends React.Component {
 			return(<div>Нет записей</div>)
 		}
 	}
+	*/
+	drawTableBody() {
+		if (this.state.records.length > 0) {
+			return (<table>
+				<tr>
+					<td>Название категории</td>
+					<td>Родительская категория</td>
+				</tr>
+				{this.state.records.map(row => 
+					<tr>
+						<td><input type="text" value={row.entity['name']} /></td>
+						<td><select size="1"><option>test</option></select></td>						
+					</tr>
+				)}
+			</table>);
+		}
+		else {
+			return(<div>Нет записей</div>)
+		}
+	}	
 	drawPageSize() {
 		return(
 			<div>

@@ -1,4 +1,4 @@
-package org.store;
+package org.store.websocket;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
@@ -10,7 +10,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.store.domain.ProductCategory;
 
-import static org.store.WebSocketConfiguration.MESSAGE_PREFIX;
+import static org.store.websocket.WebSocketConfiguration.MESSAGE_PREFIX;
 
 @Component
 @RepositoryEventHandler

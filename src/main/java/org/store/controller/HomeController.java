@@ -1,4 +1,4 @@
-package org.store;
+package org.store.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

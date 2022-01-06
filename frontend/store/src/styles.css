@@ -13,3 +13,7 @@
 .leftmenu-item {
 	list-style: none;
 }
+
+.content-table {
+	border : 1px solid;
+}

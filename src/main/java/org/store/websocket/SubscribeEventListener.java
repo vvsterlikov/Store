@@ -1,4 +1,4 @@
-package org.store;
+package org.store.websocket;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;

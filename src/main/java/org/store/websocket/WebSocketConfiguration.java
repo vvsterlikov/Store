@@ -1,4 +1,4 @@
-package org.store;
+package org.store.websocket;
 
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

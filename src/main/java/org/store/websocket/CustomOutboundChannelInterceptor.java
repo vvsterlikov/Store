@@ -1,4 +1,4 @@
-package org.store;
+package org.store.websocket;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

@@ -3,6 +3,8 @@ package org.store.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -11,14 +13,21 @@ public class ProductCategory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    private String code;
     private @Version @JsonIgnore Long version;
 
     protected ProductCategory() {}
 
-    public ProductCategory(String name, String code) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARENT_ID", nullable = true)
+    private ProductCategory parent;
+
+    @OneToMany(mappedBy = "parent",
+        fetch = FetchType.LAZY
+    )
+    private List<ProductCategory> children = new ArrayList<>();
+
+    public ProductCategory(String name) {
         this.name = name;
-        this.code = code;
     }
     public Long getId() {
         return id;
@@ -32,13 +41,18 @@ public class ProductCategory {
     public void setName(String name) {
         this.name = name;
     }
-    public String getCode() { return code;}
-    public void setCode(String code) {
-        this.code = code;
-    }
+
     public Long getVersion() { return version; }
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public void setParent(ProductCategory parent) {
+        this.parent = parent;
+    }
+
+    public ProductCategory getParent() {
+        return parent;
     }
 
     @Override
@@ -52,15 +66,14 @@ public class ProductCategory {
         ProductCategory p = (ProductCategory) o;
         return Objects.equals(id, p.id) &&
                 Objects.equals(name, p.name) &&
-                Objects.equals(code, p.code) &&
                 Objects.equals(version, p.version);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(id,name,code,version);
+        return Objects.hash(id,name,version);
     }
     @Override
     public String toString() {
-        return String.format("ProductCategory[id=%d,name=%s,code=%s,version=%d]",id,name,code,version);
+        return String.format("ProductCategory[id=%d,name=%s,code=%s,version=%d]",id,name,version);
     }
 }

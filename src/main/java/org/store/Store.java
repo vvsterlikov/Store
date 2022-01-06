@@ -7,7 +7,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.store.domain.ProductCategory;
-import org.store.repository.ProductCategoryRepository;
+import org.store.domain.ProductCategoryClassifier;
+import org.store.dao.ProductCategoryClassifierRepository;
+import org.store.dao.ProductCategoryRepository;
 
 @SpringBootApplication
 public class Store {
@@ -17,18 +19,18 @@ public class Store {
     }
 
     @Bean
-    public CommandLineRunner demo(ProductCategoryRepository productCategoryRepository) {
+    public CommandLineRunner demo(ProductCategoryRepository productCategoryRepository, ProductCategoryClassifierRepository prcr) {
         return (args) -> {
-            productCategoryRepository.save(new ProductCategory("Компьютеры", "Computers"));
-            productCategoryRepository.save(new ProductCategory("Ноутбуки", "Notebooks"));
-            productCategoryRepository.save(new ProductCategory("Системные блоки", "System blocks"));
-            productCategoryRepository.save(new ProductCategory("Мыши", "Mouses"));
-            productCategoryRepository.save(new ProductCategory("Клавиатуры", "Keyboards"));
-            productCategoryRepository.save(new ProductCategory("Периферия", "Periphery"));
-            productCategoryRepository.save(new ProductCategory("Принтеры", "Printers"));
-            productCategoryRepository.save(new ProductCategory("Видеокарты", "Videocards"));
-            productCategoryRepository.save(new ProductCategory("Сканеры", "Scaners"));
-            productCategoryRepository.save(new ProductCategory("Жесткие диски", "Harddisks"));
+            productCategoryRepository.save(new ProductCategory("Компьютеры"));
+            productCategoryRepository.save(new ProductCategory("Ноутбуки"));
+            productCategoryRepository.save(new ProductCategory("Системные блоки"));
+            productCategoryRepository.save(new ProductCategory("Мыши"));
+            productCategoryRepository.save(new ProductCategory("Клавиатуры"));
+            productCategoryRepository.save(new ProductCategory("Периферия"));
+            productCategoryRepository.save(new ProductCategory("Принтеры"));
+            productCategoryRepository.save(new ProductCategory("Видеокарты"));
+            productCategoryRepository.save(new ProductCategory("Сканеры"));
+            productCategoryRepository.save(new ProductCategory("Жесткие диски"));
             /*
             log.info("Выбираем категории из БД");
             for (ProductCategory pc : productCategoryRepository.findAll()) {
@@ -36,6 +38,16 @@ public class Store {
             }
 
              */
+            ProductCategoryClassifier pc1 = new ProductCategoryClassifier("Категория1");
+            ProductCategoryClassifier pc2 = new ProductCategoryClassifier("Категория2");
+            //prcr.save(new ProductCategoryClassifier("Категория1"));
+            //prcr.save(new ProductCategoryClassifier("Категория2"));
+
+            prcr.save(pc1);
+            prcr.save(pc2);
+
+            prcr.save(new ProductCategoryClassifier("Дочернее1",pc1));
+            prcr.save(new ProductCategoryClassifier("Дочернее2",pc1));
         };
     }
 }
