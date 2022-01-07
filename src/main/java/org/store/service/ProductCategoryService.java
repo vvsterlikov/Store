@@ -22,4 +22,7 @@ public class ProductCategoryService {
     public Page<ProductCategory> getAllCategPaging(Pageable p) {
         return pcDAO.findAll(p);
     }
+    public ProductCategory save(ProductCategory pc) {
+        return  pcDAO.save(pc);
+    }
 }

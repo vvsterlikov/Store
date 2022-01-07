@@ -8,10 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.store.domain.ProductCategory;
 import org.store.service.ProductCategoryService;
 
@@ -21,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@ExposesResourceFor(ProductCategory.class)
 @RequestMapping("/api/productCategories")
 public class ProductCategoryRESTController {
     @Autowired
@@ -43,5 +39,10 @@ public class ProductCategoryRESTController {
         response.put("totalPages",pageProductCategories.getTotalPages());
 
         return new ResponseEntity(response, HttpStatus.OK);
+    }
+    @PostMapping
+    public ResponseEntity<ProductCategory> save(@RequestBody ProductCategory pc) {
+        System.out.println("save");
+        return new ResponseEntity(service.save(pc),HttpStatus.OK);
     }
 }
