@@ -17,7 +17,7 @@ public class ProductCategory {
 
     protected ProductCategory() {}
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "PARENT_ID", nullable = true)
     private ProductCategory parent;
 
@@ -50,6 +50,14 @@ public class ProductCategory {
 
     public void setParent(ProductCategory parent) {
         this.parent = parent;
+    }
+
+    public List<ProductCategory> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ProductCategory> children) {
+        this.children = children;
     }
 
     public ProductCategory getParent() {

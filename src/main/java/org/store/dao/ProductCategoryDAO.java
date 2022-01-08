@@ -9,6 +9,7 @@ import org.store.domain.ProductCategory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -16,7 +17,11 @@ public class ProductCategoryDAO {
     @PersistenceContext
     private EntityManager em;
 
-    public List<ProductCategory> findAll() {
-        return em.createQuery("select pc from ProductCategory pc").getResultList();
+    @Transactional
+    public ProductCategory save(ProductCategory pc) {
+
+        em.persist(pc);
+        return pc;
     }
+
 }

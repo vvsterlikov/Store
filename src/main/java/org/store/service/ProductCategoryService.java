@@ -16,6 +16,9 @@ public class ProductCategoryService {
     //private ProductCategoryDAO pcDAO;
     private ProductCategoryRepository pcDAO;
 
+    @Autowired
+    private ProductCategoryDAO pcDAOCustom;
+
     //public List<ProductCategory> getAllCateg() {
     //    return pcDAO.findAll();
     //}
@@ -23,6 +26,6 @@ public class ProductCategoryService {
         return pcDAO.findAll(p);
     }
     public ProductCategory save(ProductCategory pc) {
-        return  pcDAO.save(pc);
+        return  pcDAOCustom.save(pc);
     }
 }
