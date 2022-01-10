@@ -17,15 +17,16 @@ public class ProductCategory {
 
     protected ProductCategory() {}
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "PARENT_ID", nullable = true)
+    @ManyToOne(optional=true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //@JoinColumn(name = "PARENT_ID", nullable = true)
     private ProductCategory parent;
 
+    /*
     @OneToMany(mappedBy = "parent",
-        fetch = FetchType.LAZY,
-        cascade = CascadeType.ALL
+        fetch = FetchType.LAZY
     )
     private List<ProductCategory> children = new ArrayList<>();
+*/
 
     public ProductCategory(String name) {
         this.name = name;
@@ -51,7 +52,7 @@ public class ProductCategory {
     public void setParent(ProductCategory parent) {
         this.parent = parent;
     }
-
+/*
     public List<ProductCategory> getChildren() {
         return children;
     }
@@ -59,7 +60,7 @@ public class ProductCategory {
     public void setChildren(List<ProductCategory> children) {
         this.children = children;
     }
-
+*/
     public ProductCategory getParent() {
         return parent;
     }

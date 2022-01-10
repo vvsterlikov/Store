@@ -19,7 +19,6 @@ public class ProductCategoryDAO {
 
     @Transactional
     public ProductCategory save(ProductCategory pc) {
-
         em.persist(pc);
         return pc;
     }
