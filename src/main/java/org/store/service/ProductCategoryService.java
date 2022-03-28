@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.store.dao.ProductCategoryDAOCustom;
 import org.store.dao.ProductCategoryDAO;
-import org.store.dao.ProductCategoryRepository;
 import org.store.domain.ProductCategory;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
 public class ProductCategoryService {
     @Autowired
     //private ProductCategoryDAO pcDAO;
-    private ProductCategoryRepository pcDAO;
+    private ProductCategoryDAO pcDAO;
 
     @Autowired
-    private ProductCategoryDAO pcDAOCustom;
+    private ProductCategoryDAOCustom pcDAOCustom;
 
     //public List<ProductCategory> getAllCateg() {
     //    return pcDAO.findAll();
@@ -26,6 +26,13 @@ public class ProductCategoryService {
         return pcDAO.findAll(p);
     }
     public ProductCategory save(ProductCategory pc) {
-        return  pcDAOCustom.save(pc);
+        System.out.println("save service");
+        return pcDAOCustom.save(pc);
+    }
+    public List<ProductCategory> getAllCateg() {
+        return (List<ProductCategory>) pcDAO.findAll();
+    }
+    public List<ProductCategory> getAvailableParents(Long id) {
+        return  pcDAOCustom.getAvailableParents(id);
     }
 }

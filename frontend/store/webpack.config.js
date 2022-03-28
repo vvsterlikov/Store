@@ -1,6 +1,17 @@
 const path = require("path");
+//const webpack = require('webpack')
+
 
 module.exports = {
+  mode: 'development',
+  devServer: {
+    static: {
+      //directory: path.join(__dirname, 'public'),
+      directory : path.join(__dirname, "../../src/main/resources/static/"),
+    },
+    compress: true,
+    port: 9000,
+  },
   entry: "./src/index.js",
   output: {
     path: path.join(__dirname, "../../src/main/resources/static/"),

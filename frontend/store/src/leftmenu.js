@@ -7,7 +7,7 @@ export default class LeftMenu extends React.Component {
 		super(props);
 	}
 	render() {
-		return	<ul>{this.props.menuItems.map((item, index) => <li className="leftmenu-item"><button type='button' onClick={() => this.props.clickHandler(index)}>{item}</button></li>)}</ul>;
+		return	<ul>{this.props.menuItems.map((item, index) => <li key={index} className="leftmenu-item"><button type='button' onClick={() => this.props.clickHandler(index)}>{item}</button></li>)}</ul>;
 	}
 }
 

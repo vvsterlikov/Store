@@ -19,11 +19,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productCategories")
+@CrossOrigin
 public class ProductCategoryRESTController {
     @Autowired
     ProductCategoryService service;
     @GetMapping
-    public ResponseEntity<List<ProductCategory>> getAllCategories(
+    public ResponseEntity<List<ProductCategory>> getAllCategoriesPaging(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size
     ) {
@@ -42,7 +43,33 @@ public class ProductCategoryRESTController {
     }
     @PostMapping
     public ResponseEntity<ProductCategory> save(@RequestBody ProductCategory pc) {
-        System.out.println("save");
+        System.out.println("save controller");
+        //todo: здесь сконструировать объект имея Id родителя
         return new ResponseEntity(service.save(pc),HttpStatus.OK);
+    }
+    @GetMapping(value = "/getAllRecords")
+    public ResponseEntity<List<ProductCategory>> getAllCategories() {
+        return new ResponseEntity(service.getAllCateg(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getAvailableParents")
+    public ResponseEntity<List<ProductCategory>> getAvailableParents(
+            @RequestParam(defaultValue = "") String id
+    ){
+        if (id.equals("")) {
+            return new ResponseEntity(service.getAllCateg(),HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity(service.getAvailableParents(Long.parseLong(id)), HttpStatus.OK);
+        }
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductCategory> updateProductCategory(
+            @PathVariable(value="id") Long id,
+            @RequestBody ProductCategory pc
+    ) {
+        System.out.println("id="+id);
+        System.out.println("parent id="+pc.getId());
+        return null;
     }
 }

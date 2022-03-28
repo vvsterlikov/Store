@@ -7,9 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.store.domain.ProductCategory;
-import org.store.domain.ProductCategoryClassifier;
-import org.store.dao.ProductCategoryClassifierRepository;
-import org.store.dao.ProductCategoryRepository;
+import org.store.dao.ProductCategoryDAO;
 
 @SpringBootApplication
 public class Store {
@@ -19,7 +17,7 @@ public class Store {
     }
 
     @Bean
-    public CommandLineRunner demo(ProductCategoryRepository productCategoryRepository, ProductCategoryClassifierRepository prcr) {
+    public CommandLineRunner demo(ProductCategoryDAO productCategoryRepository) {
         return (args) -> {
             productCategoryRepository.save(new ProductCategory("Компьютеры"));
             productCategoryRepository.save(new ProductCategory("Ноутбуки"));
@@ -38,16 +36,17 @@ public class Store {
             }
 
              */
-            ProductCategoryClassifier pc1 = new ProductCategoryClassifier("Категория1");
-            ProductCategoryClassifier pc2 = new ProductCategoryClassifier("Категория2");
+
+            //ProductCategoryClassifier pc1 = new ProductCategoryClassifier("Категория1");
+            //ProductCategoryClassifier pc2 = new ProductCategoryClassifier("Категория2");
             //prcr.save(new ProductCategoryClassifier("Категория1"));
             //prcr.save(new ProductCategoryClassifier("Категория2"));
 
-            prcr.save(pc1);
-            prcr.save(pc2);
+            //prcr.save(pc1);
+            //prcr.save(pc2);
 
-            prcr.save(new ProductCategoryClassifier("Дочернее1",pc1));
-            prcr.save(new ProductCategoryClassifier("Дочернее2",pc1));
+            //prcr.save(new ProductCategoryClassifier("Дочернее1",pc1));
+            //prcr.save(new ProductCategoryClassifier("Дочернее2",pc1));
         };
     }
 }
