@@ -63,6 +63,21 @@ class ProductCategoryDAOCustomTest {
         long cntPar = pcDAO.getAvailableParentsById(pc.getId()).size();
         assertEquals(cntBefore,cntPar);
     }
+    @Test
+    public void getAvailableParentsByIdHasChildren() {
+        ProductCategory par1 = new ProductCategory("par1");
+        ProductCategory par2 = new ProductCategory("par2",par1);
+
+        //pcDAO.save(par2);
+
+    }
+
+    @Test
+    public void countByName() {
+        ProductCategory pc = new ProductCategory("countByName");
+        pcDAO.save(pc);
+        assertEquals(1, pcDAO.countByName("countByName"));
+    }
 
 
 

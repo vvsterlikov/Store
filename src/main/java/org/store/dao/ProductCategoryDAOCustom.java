@@ -22,13 +22,30 @@ public class ProductCategoryDAOCustom {
     @PersistenceContext
     private EntityManager em;
 
+
+    public long countByName(String name) {
+        return (Long) em.createQuery("select count(pc) from ProductCategory pc where name = :name")
+                .setParameter("name",name)
+                .getSingleResult();
+    }
+
     @Transactional
     public ProductCategory save(ProductCategory pc) {
         System.out.println("save repository");
         if (pc.getParent() == null || pc.getParent().getName() == "") {
-            em.persist(new ProductCategory(pc.getName()));
+            //em.persist(new ProductCategory(pc.getName()));
+            em.persist(pc);
         }
         else if (pc.getParent().getName() != "") {
+            long parCnt = countByName(pc.getParent().getName());
+            if (parCnt == 1) {
+                em.persist(pc);
+            }
+            else if (parCnt == 0) {
+                em.persist(pc.getParent());
+
+            }
+
             System.out.println("сохранение объекта с родителем end");
             String parName = pc.getParent().getName();
 
@@ -54,9 +71,11 @@ public class ProductCategoryDAOCustom {
                     .getResultList();
         }
         else {
+            String query = "select * from ProductCategory";
+            return em.createNativeQuery(query).getResultList();
 
         }
-        return  null;
+        //return  null;
     }
 
     public long countAll() {
