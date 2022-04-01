@@ -2,6 +2,7 @@ package org.store.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
@@ -9,6 +10,9 @@ import org.store.domain.ProductCategory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaUpdate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,14 +43,41 @@ public class ProductCategoryDAOCustom {
         }
         return pc;
     }
-    public List<ProductCategory> getAvailableParents(Long id) {
+    @Transactional
+    public List<ProductCategory> getAvailableParentsById(Long id) {
+        ProductCategory pc = (ProductCategory) em.createQuery("select pc from ProductCategory pc where pc.id = :pcId")
+                .setParameter("pcId",id)
+                .getSingleResult();
+        if (pc.getChildren().size() == 0) {
+            return em.createQuery("select pc from ProductCategory pc where pc.id <> :pcId")
+                    .setParameter("pcId",id)
+                    .getResultList();
+        }
+        else {
+
+        }
         return  null;
+    }
+
+    public long countAll() {
+        return (long) em.createQuery("select count(pc) from ProductCategory pc").getSingleResult();
     }
 
     public  ProductCategory getProductCategoryByName(String name) {
         return (ProductCategory) em.createQuery("select pc from ProductCategory pc where pc.name = :pcName")
                 .setParameter("pcName",name)
                 .getSingleResult();
+    }
+    @Transactional
+    public int updateStringAttr(Long id, String attrName, String newVal) {
+        System.out.println("begin updateStringAttr");
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaUpdate<ProductCategory> criteriaUpdate = cb.createCriteriaUpdate(ProductCategory.class);
+        Root<ProductCategory> pcRoot = criteriaUpdate.from(ProductCategory.class);
+        criteriaUpdate.set(pcRoot.get(attrName),newVal)
+                .where(cb.equal(pcRoot.get("id"),id));
+        int i = em.createQuery(criteriaUpdate).executeUpdate();
+        return i;
     }
 
 }

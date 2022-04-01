@@ -19,17 +19,15 @@ public class ProductCategory {
 
     protected ProductCategory() {}
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     private ProductCategory parent;
 
 
-    /*
     @OneToMany(mappedBy = "parent",
         fetch = FetchType.LAZY
     )
     private List<ProductCategory> children = new ArrayList<>();
-*/
 
     public ProductCategory(String name) {
         this.name = name;
@@ -72,6 +70,10 @@ public class ProductCategory {
         return parent;
     }
 
+    public List<ProductCategory> getChildren() {
+        return  this.children;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -91,6 +93,6 @@ public class ProductCategory {
     } //,version
     @Override
     public String toString() {
-        return String.format("ProductCategory[id=%d,name=%s,code=%s,version=%d]",id,name); //,version
+        return String.format("ProductCategory[id=%d,name=%s,code=%s]",id,name);
     }
 }
