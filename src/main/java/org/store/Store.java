@@ -16,7 +16,7 @@ public class Store {
         SpringApplication.run(Store.class, args);
     }
 
-    @Bean
+    //@Bean
     public CommandLineRunner demo(ProductCategoryDAO productCategoryRepository) {
         return (args) -> {
             productCategoryRepository.save(new ProductCategory("Компьютеры"));
@@ -48,5 +48,7 @@ public class Store {
             //prcr.save(new ProductCategoryClassifier("Дочернее1",pc1));
             //prcr.save(new ProductCategoryClassifier("Дочернее2",pc1));
         };
+
     }
+
 }

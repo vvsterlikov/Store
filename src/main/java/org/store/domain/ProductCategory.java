@@ -93,6 +93,6 @@ public class ProductCategory {
     } //,version
     @Override
     public String toString() {
-        return String.format("ProductCategory[id=%d,name=%s,code=%s]",id,name);
+        return String.format("ProductCategory[id=%d,name=%s]",id,name);
     }
 }

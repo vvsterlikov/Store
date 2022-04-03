@@ -31,17 +31,21 @@ public class ProductCategoryDAOCustom {
 
     @Transactional
     public ProductCategory save(ProductCategory pc) {
-        System.out.println("save repository");
+        System.out.println("begin save");
         if (pc.getParent() == null || pc.getParent().getName() == "") {
+            System.out.println("no parent, save");
             //em.persist(new ProductCategory(pc.getName()));
             em.persist(pc);
         }
         else if (pc.getParent().getName() != "") {
+            System.out.println("has parent");
             long parCnt = countByName(pc.getParent().getName());
             if (parCnt == 1) {
+                System.out.println("parent count=1, save record");
                 em.persist(pc);
             }
             else if (parCnt == 0) {
+                System.out.println("parent count=0, first save parent");
                 em.persist(pc.getParent());
 
             }
@@ -58,6 +62,7 @@ public class ProductCategoryDAOCustom {
             //System.out.println("сохранение объекта с родителем end"+parId);
 
         }
+        System.out.println("end save");
         return pc;
     }
     @Transactional
@@ -97,6 +102,19 @@ public class ProductCategoryDAOCustom {
                 .where(cb.equal(pcRoot.get("id"),id));
         int i = em.createQuery(criteriaUpdate).executeUpdate();
         return i;
+    }
+
+    public List<ProductCategory> getAll() {
+        return (List<ProductCategory>) em.createQuery("select pc from ProductCategory pc")
+                .getResultList();
+    }
+
+    public void printAll() {
+        System.out.println("begin print");
+        for (ProductCategory p : this.getAll()) {
+            System.out.println(p);
+        }
+        System.out.println("begin print");
     }
 
 }
