@@ -114,7 +114,7 @@ public class ProductCategoryDAOCustom {
         for (ProductCategory p : this.getAll()) {
             System.out.println(p);
         }
-        System.out.println("begin print");
+        System.out.println("end print");
     }
 
 }

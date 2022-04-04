@@ -95,4 +95,9 @@ public class ProductCategory {
     public String toString() {
         return String.format("ProductCategory[id=%d,name=%s]",id,name);
     }
+
+    public void addChildCategory(ProductCategory pc) {
+        children.add(pc);
+        pc.setParent(this);
+    }
 }

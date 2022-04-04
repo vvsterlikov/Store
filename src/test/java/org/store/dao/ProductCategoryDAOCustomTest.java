@@ -26,6 +26,9 @@ class ProductCategoryDAOCustomTest {
         ProductCategory pcParentFromDB = pcDAO.getProductCategoryByName("Родитель1");
         assertEquals(pcParent.getName(),pcParentFromDB.getName());
         ProductCategory pc = new ProductCategory("Потомок1",pcParent);
+
+        pcDAO.printAll();
+
         pcDAO.save(pc);
 
         pcDAO.printAll();
