@@ -1,5 +1,7 @@
 package org.store.dao;
 
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,40 @@ class ProductCategoryDAOCustomTest {
     @Autowired
     private ProductCategoryDAOCustom pcDAO;
 
+    @BeforeEach
+    public void deleteRecords() {
+        pcDAO.deleteAll();
+    }
+
     @Test
+    public void deleteAllTest() {
+        assertEquals(0,pcDAO.countAll());
+    }
+
+    @Test
+    public void saveNoChildren() {
+        ProductCategory pc = new ProductCategory("pc");
+        pcDAO.save(pc);
+        pc = pcDAO.getProductCategoryByName("pc");
+        assertEquals("pc",pc.getName());
+        assertEquals(0,pc.getChildren().size());
+    }
+
+    @Test
+    public void saveWithChildren() {
+        //System.out.println("saveWithChildren begin");
+        ProductCategory pc = new ProductCategory("pcPar");
+        pc.addChildCategory(new ProductCategory("pcChild1"));
+        pcDAO.save(pc);
+        pc = pcDAO.getProductCategoryByName("pcPar");
+        assertEquals("pcChild1",pc.getChildren().get(0).getName());
+        //pcDAO.printAll();
+        //System.out.println("saveWithChildren end");
+
+    }
+
+    @Test
+    @Disabled
     public void save() {
         assertNotNull(pcDAO);
         ProductCategory pcParent = new ProductCategory("Родитель1");

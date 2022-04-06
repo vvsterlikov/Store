@@ -25,7 +25,7 @@ public class ProductCategory {
 
 
     @OneToMany(mappedBy = "parent",
-        fetch = FetchType.LAZY
+        fetch = FetchType.LAZY, cascade = CascadeType.ALL
     )
     private List<ProductCategory> children = new ArrayList<>();
 
@@ -91,9 +91,23 @@ public class ProductCategory {
     public int hashCode() {
          return Objects.hash(id,name,parent);
     } //,version
+
     @Override
     public String toString() {
-        return String.format("ProductCategory[id=%d,name=%s]",id,name);
+        String par = "null";
+        String _children = "[null]";
+        if (this.parent != null) {
+            par = String.format("{id=%d,name=%s}",parent.id,parent.name);
+        }
+        if (this.children.size() > 0) {
+            _children = "[";
+            for (ProductCategory pc : this.children) {
+                _children += "id="+pc.id+",name="+pc.name+";";
+            }
+            _children += "]";
+        }
+        String pc = String.format("ProductCategory{id=%d,name=%s,parent=%s,children=%s}", id, name, par, _children);
+        return pc;
     }
 
     public void addChildCategory(ProductCategory pc) {

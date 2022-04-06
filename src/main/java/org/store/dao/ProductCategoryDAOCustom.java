@@ -1,9 +1,12 @@
 package org.store.dao;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.store.domain.ProductCategory;
@@ -31,6 +34,7 @@ public class ProductCategoryDAOCustom {
 
     @Transactional
     public ProductCategory save(ProductCategory pc) {
+        /*
         System.out.println("begin save");
         if (pc.getParent() == null || pc.getParent().getName() == "") {
             System.out.println("no parent, save");
@@ -63,6 +67,9 @@ public class ProductCategoryDAOCustom {
 
         }
         System.out.println("end save");
+
+         */
+        em.persist(pc);
         return pc;
     }
     @Transactional
@@ -104,17 +111,29 @@ public class ProductCategoryDAOCustom {
         return i;
     }
 
-    public List<ProductCategory> getAll() {
-        return (List<ProductCategory>) em.createQuery("select pc from ProductCategory pc")
+    public ProductCategory findOneEagerly(Long id) {
+        ProductCategory pc = em.find(ProductCategory.class,id);
+        Hibernate.initialize(pc.getChildren());
+        return pc;
+    }
+
+    public List<ProductCategory> getAllEagerly() {
+        return (List<ProductCategory>) em
+                .createQuery("select pc from ProductCategory pc left join fetch pc.children")
                 .getResultList();
     }
 
     public void printAll() {
-        System.out.println("begin print");
-        for (ProductCategory p : this.getAll()) {
-            System.out.println(p);
-        }
-        System.out.println("end print");
+        for (ProductCategory p : this.getAllEagerly()) {
+                System.out.println(p);
+            }
+        System.out.println("printAll");
+
     }
 
+    @Transactional
+    public void deleteAll() {
+        em.createQuery("delete ProductCategory").executeUpdate();
+        return;
+    }
 }
