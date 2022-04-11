@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 import org.store.domain.ProductCategory;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUtil;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
@@ -74,17 +76,28 @@ public class ProductCategoryDAOCustom {
     }
     @Transactional
     public List<ProductCategory> getAvailableParentsById(Long id) {
-        ProductCategory pc = (ProductCategory) em.createQuery("select pc from ProductCategory pc where pc.id = :pcId")
-                .setParameter("pcId",id)
-                .getSingleResult();
+        ProductCategory pc = em.find(ProductCategory.class,id);
+
         if (pc.getChildren().size() == 0) {
             return em.createQuery("select pc from ProductCategory pc where pc.id <> :pcId")
                     .setParameter("pcId",id)
                     .getResultList();
         }
         else {
-            String query = "select * from ProductCategory";
-            return em.createNativeQuery(query).getResultList();
+            String query = "with recursive r as ( " +
+                    "select id, parent_id " +
+                    "from product_category " +
+                    "where id = :id " +
+                    "union all " +
+                    "select id "+
+                    "from product_category join r on product_category.parent_id = r.id " +
+                    ") " +
+                    "select * from r ";
+            System.out.println("run recursive");
+            List<Long> result = em.createNativeQuery(query,Long.class)
+                    .setParameter("id",id)
+                    .getResultList();
+            return null;
 
         }
         //return  null;
@@ -98,6 +111,34 @@ public class ProductCategoryDAOCustom {
         return (ProductCategory) em.createQuery("select pc from ProductCategory pc where pc.name = :pcName")
                 .setParameter("pcName",name)
                 .getSingleResult();
+    }
+
+    @Transactional
+    public ProductCategory getByNameEagerly(String name) {
+        //ProductCategory pc = (ProductCategory) em.createQuery("select pc from ProductCategory pc left join fetch pc.children where pc.name = :n")
+        ProductCategory pc = (ProductCategory) em
+                .createQuery("select pc from ProductCategory pc  where pc.name = :n")
+                .setParameter("n",name)
+                .getSingleResult();
+        System.out.println("before initial");
+        Hibernate.initialize(pc.getChildren());
+        System.out.println("after initial");
+        return pc;
+    }
+    @Transactional
+    public String getChildName(String name) {
+        //ProductCategory pc = (ProductCategory) em.createQuery("select pc from ProductCategory pc left join fetch pc.children where pc.name = :n")
+        ProductCategory pc = (ProductCategory) em.createQuery("select pc from ProductCategory pc  where pc.name = :n")
+                .setParameter("n",name)
+                .getSingleResult();
+        Long id = pc.getId();
+        //pc = em.find(ProductCategory.class,id);
+        PersistenceUtil pu = Persistence.getPersistenceUtil();
+        //em.refresh(pc);
+        System.out.println("!!loaded "+pu.isLoaded(pc,"children"));
+        List<ProductCategory> children = pc.getChildren();
+        String result = children.get(0).getName();
+        return result;
     }
     @Transactional
     public int updateStringAttr(Long id, String attrName, String newVal) {
@@ -119,16 +160,15 @@ public class ProductCategoryDAOCustom {
 
     public List<ProductCategory> getAllEagerly() {
         return (List<ProductCategory>) em
-                .createQuery("select pc from ProductCategory pc left join fetch pc.children")
+                .createQuery("select distinct pc from ProductCategory pc left join fetch pc.children",ProductCategory.class)
                 .getResultList();
     }
 
     public void printAll() {
-        for (ProductCategory p : this.getAllEagerly()) {
+        List<ProductCategory> list = this.getAllEagerly();
+        for (ProductCategory p : list) {
                 System.out.println(p);
             }
-        System.out.println("printAll");
-
     }
 
     @Transactional
