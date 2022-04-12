@@ -6,15 +6,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import org.store.domain.ProductCategory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceUtil;
+import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Root;
@@ -74,6 +70,14 @@ public class ProductCategoryDAOCustom {
         em.persist(pc);
         return pc;
     }
+
+    @SqlResultSetMapping(name="ProductCategoryResult", classes = {
+            @ConstructorResult(targetClass = ProductCategory.class,
+                    columns = {
+                        @ColumnResult(name="id"),
+                            @ColumnResult(name="parent_id")
+            })
+    })
     @Transactional
     public List<ProductCategory> getAvailableParentsById(Long id) {
         ProductCategory pc = em.find(ProductCategory.class,id);
@@ -84,23 +88,27 @@ public class ProductCategoryDAOCustom {
                     .getResultList();
         }
         else {
-            String query = "with recursive r as ( " +
-                    "select id, parent_id " +
-                    "from product_category " +
-                    "where id = :id " +
-                    "union all " +
-                    "select id "+
-                    "from product_category join r on product_category.parent_id = r.id " +
-                    ") " +
-                    "select * from r ";
-            System.out.println("run recursive");
-            List<Long> result = em.createNativeQuery(query,Long.class)
+            String query = "with recursive r(id) as (\n" +
+                    "select id\n" +
+                    "from product_category\n" +
+                    "where id = :id\n" +
+                    "union all\n" +
+                    "select pc.id from product_category pc join r on pc.parent_id = r.id\n" +
+                    ") \n" +
+                    "select t1.id from product_category t1 where t1.id not in (select id from r)";
+            Query q = em.createNativeQuery(query,"");
+            List<ProductCategory> result = em.createNativeQuery(query)
                     .setParameter("id",id)
                     .getResultList();
             return null;
 
         }
         //return  null;
+    }
+
+    public List<ProductCategory> getByIds(List<Long> ids) {
+        List<ProductCategory> result = new ArrayList<>();
+        return null;
     }
 
     public long countAll() {
