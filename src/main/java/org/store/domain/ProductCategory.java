@@ -8,8 +8,31 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+
 @JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Entity
+@org.hibernate.annotations.NamedNativeQuery(
+        name = "AvailParents",
+        query = "with recursive r(id) as (\n"+
+                "select id from product_category where id = ?1\n"+
+                "union all\n"+
+                "select pc.id from product_category pc join r on pc.parent_id = r.id)\n"+
+                "select id, name from product_category where id not in (select id from r)",
+        resultSetMapping = "IdMapping"
+)
+@SqlResultSetMapping(
+        name = "IdMapping",
+        classes = {
+          @ConstructorResult(
+                  targetClass = ProductCategory.class,
+                  columns={
+                          @ColumnResult(name="id", type=Long.class),
+                          @ColumnResult(name="name", type=String.class)
+                  }
+          )
+        }
+)
 public class ProductCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,6 +58,10 @@ public class ProductCategory {
     public ProductCategory(String name, ProductCategory parent) {
         this.name = name;
         this.parent = parent;
+    }
+    public ProductCategory(Long id, String name) {
+        this.id = id;
+        this.name = name;
     }
     public Long getId() {
         return id;

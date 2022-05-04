@@ -110,6 +110,7 @@ class ProductCategoryDAOCustomTest {
         ProductCategory child3 = new ProductCategory("child3",par1);
         ProductCategory par2 = new ProductCategory("par2");
 
+
         ProductCategory child11 = new ProductCategory("child11",child1);
         ProductCategory child12 = new ProductCategory("child12",child1);
 
@@ -128,13 +129,29 @@ class ProductCategoryDAOCustomTest {
         pcDAO.save(child111);
         pcDAO.save(child112);
 
-        ProductCategory pc = pcDAO.getByNameEagerly("child1");
+        /*
+        par1
+            child1
+                child11
+                    child111
+                    child112
+                child12
+            child2
+            child3
+        par2
+         */
+
 
         assertEquals(9, pcDAO.countAll());
-        pcDAO.printAll();
 
-        pcDAO.getAvailableParentsById(pc.getId());
+        ProductCategory pc = pcDAO.getByNameEagerly("child1");
+        assertEquals(4,pcDAO.getAvailableParentsById(pc.getId()).size());
 
+        pc = pcDAO.getByNameEagerly("par1");
+        assertEquals(1,pcDAO.getAvailableParentsById(pc.getId()).size());
+
+        pc = pcDAO.getByNameEagerly("child112");
+        assertEquals(8,pcDAO.getAvailableParentsById(pc.getId()).size());
 
     }
 

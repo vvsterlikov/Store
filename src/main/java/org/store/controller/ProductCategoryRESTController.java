@@ -44,7 +44,6 @@ public class ProductCategoryRESTController {
     @PostMapping
     public ResponseEntity<ProductCategory> save(@RequestBody ProductCategory pc) {
         System.out.println("save controller");
-        //todo: здесь сконструировать объект имея Id родителя
         return new ResponseEntity(service.save(pc),HttpStatus.OK);
     }
     @GetMapping(value = "/getAllRecords")
@@ -52,17 +51,20 @@ public class ProductCategoryRESTController {
         return new ResponseEntity(service.getAllCateg(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getAvailableParents")
+    @GetMapping(value = "/getAvailableParents/{id}")
     public ResponseEntity<List<ProductCategory>> getAvailableParents(
-            @RequestParam(defaultValue = "") String id
+            @PathVariable String id
     ){
-        if (id.equals("")) {
-            return new ResponseEntity(service.getAllCateg(),HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity(service.getAvailableParents(Long.parseLong(id)), HttpStatus.OK);
-        }
+        System.out.println("getAvailableParents with id begin");
+        System.out.println("id1="+id);
+        return new ResponseEntity(service.getAvailableParents(id), HttpStatus.OK);
     }
+    @GetMapping(value = "/getAvailableParents")
+    public ResponseEntity<List<ProductCategory>> getAvailableParents(){
+        System.out.println("getAvailableParents no id begin");
+        return new ResponseEntity(service.getAvailableParents(""), HttpStatus.OK);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProductCategory> updateProductCategory(
             @PathVariable(value="id") Long id,

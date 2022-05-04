@@ -39,7 +39,8 @@ const ProductCategoriesAdministration = () => {
 	},[page]);
 
 	async function openPopupEdit(id='') {
-		const availParents = await client({method : 'GET', path : getAvailableParentsPath});
+		console.log("edit id="+id);
+		const availParents = await client({method : 'GET', path : getAvailableParentsPath+"/"+id});
 		const record = {
 			id : id,
 			name : response.entity.productCategories.filter(elem => elem.id==id)[0].name,
@@ -54,7 +55,8 @@ const ProductCategoriesAdministration = () => {
 	async function openPopupNew() {
 		const response = await client({method : 'GET', path : getAvailableParentsPath});
 		const record = {...popupParams.record, parent : [...response.entity]};
-		console.log(record);
+		console.log("open popup new1");
+		console.log(response);
 		setPopupParams({isEditVisible : true, record});
 
 	}

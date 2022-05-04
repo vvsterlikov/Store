@@ -33,8 +33,11 @@ public class ProductCategoryService {
         return (List<ProductCategory>) pcDAO.findAll();
     }
 
-    public List<ProductCategory> getAvailableParents(Long id) {
-        return  pcDAOCustom.getAvailableParentsById(id);
+    public List<ProductCategory> getAvailableParents(String id) {
+        if (id.isEmpty()) {
+            return pcDAOCustom.getAllEagerly();
+        }
+        return pcDAOCustom.getAvailableParentsById(Long.parseLong(id));
     }
 
 }

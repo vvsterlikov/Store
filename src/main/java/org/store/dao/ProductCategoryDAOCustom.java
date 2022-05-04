@@ -71,15 +71,9 @@ public class ProductCategoryDAOCustom {
         return pc;
     }
 
-    @SqlResultSetMapping(name="ProductCategoryResult", classes = {
-            @ConstructorResult(targetClass = ProductCategory.class,
-                    columns = {
-                        @ColumnResult(name="id"),
-                            @ColumnResult(name="parent_id")
-            })
-    })
     @Transactional
     public List<ProductCategory> getAvailableParentsById(Long id) {
+        /*
         ProductCategory pc = em.find(ProductCategory.class,id);
 
         if (pc.getChildren().size() == 0) {
@@ -88,6 +82,7 @@ public class ProductCategoryDAOCustom {
                     .getResultList();
         }
         else {
+
             String query = "with recursive r(id) as (\n" +
                     "select id\n" +
                     "from product_category\n" +
@@ -96,13 +91,22 @@ public class ProductCategoryDAOCustom {
                     "select pc.id from product_category pc join r on pc.parent_id = r.id\n" +
                     ") \n" +
                     "select t1.id from product_category t1 where t1.id not in (select id from r)";
-            Query q = em.createNativeQuery(query,"");
+            Query q1 = em.createNativeQuery(query);
+            */
+            /*
             List<ProductCategory> result = em.createNativeQuery(query)
                     .setParameter("id",id)
                     .getResultList();
             return null;
+             */
+            //Query q = em.createNamedQuery("AvailParents");
 
-        }
+            List<ProductCategory> res = (List<ProductCategory>) em.createNamedQuery("AvailParents",ProductCategory.class)
+                    .setParameter(1,id)
+                    .getResultList();
+            return res;
+
+        //}
         //return  null;
     }
 
