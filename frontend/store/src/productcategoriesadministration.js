@@ -30,6 +30,7 @@ const ProductCategoriesAdministration = () => {
 	const [response, setResponse] = useState({});
 
 	async function fetchData(p) {
+		console.log("fetch p="+p);
 		const response = await client({method : 'GET', path : path+'?page='+p});
 		setResponse(response);
 	}
@@ -80,6 +81,9 @@ const ProductCategoriesAdministration = () => {
 					'Content-Type' : 'application/json',
 				}
 			});
+			closePopup();
+			console.log("before setPage");
+			setPage(0);
 		}
 		catch(e) {
 			console.log("saveRecord::"+e);
